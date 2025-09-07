@@ -41,7 +41,6 @@ class Farm(Base, AuditMixin, SFIDMixin, SoftDeleteMixin, TimestampMixin, UUIDMix
     location_gps_altitude = Column(Numeric(10, 2), nullable=False)
     farm_size_coffee_trees = Column(Integer, nullable=False)
     farm_size_land_measurements = Column(Numeric(10, 6), nullable=False)
-    latest_farm_visit_record = Column(UUID(as_uuid=True), ForeignKey(f"{SCHEMA}.farm_visits.id"), nullable=False)
     main_coffee_field = Column(Boolean, default=False, nullable=False)
     planting_month_and_year = Column(Date, nullable=False)
     planted_out_of_season = Column(Boolean, default=False, nullable=False)
@@ -50,7 +49,6 @@ class Farm(Base, AuditMixin, SFIDMixin, SoftDeleteMixin, TimestampMixin, UUIDMix
     planted_on_visit_date = Column(Boolean, nullable=False, default=False)
     
     # Relationships
-    farm_visit = relationship("FarmVisit", foreign_keys=[farm_visit_id], back_populates="farms")
-    latest_visit = relationship("FarmVisit", foreign_keys=[latest_farm_visit_record])
+    farm_visit = relationship("FarmVisit", back_populates="farms")
     household = relationship("Household", back_populates="farms")
     coffee_varieties = relationship("CoffeeVariety", back_populates="farm", cascade="all, delete-orphan")

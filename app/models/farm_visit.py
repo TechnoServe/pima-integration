@@ -49,9 +49,10 @@ class FarmVisit(Base, AuditMixin, SFIDMixin, SoftDeleteMixin, TimestampMixin, UU
     
     # Relationships
     visited_household = relationship("Household", back_populates="farm_visits")
-    primary_farmer = relationship("Farmer", foreign_keys=[visited_primary_farmer_id], back_populates="farm_visits")
-    secondary_farmer = relationship("Farmer", foreign_keys=[visited_secondary_farmer_id], back_populates="farm_visits")
+    primary_farmer = relationship("Farmer", foreign_keys=[visited_primary_farmer_id], back_populates="farm_visits_primary_farmer")
+    secondary_farmer = relationship("Farmer", foreign_keys=[visited_secondary_farmer_id], back_populates="farm_visits_secondary_farmer")
     training_session = relationship("TrainingSession", back_populates="farm_visit")
     visiting_staff = relationship("Staff", back_populates="farm_visits")
     checks = relationship("Check", back_populates="farm_visit")
     fv_best_practices = relationship("FVBestPractice", back_populates="farm_visit")
+    farms = relationship("Farm", back_populates="farm_visit")

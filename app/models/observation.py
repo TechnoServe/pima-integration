@@ -42,8 +42,8 @@ class Observation(Base, AuditMixin, TimestampMixin, SFIDMixin, SoftDeleteMixin, 
     
     # Relationships
     observation_results = relationship("ObservationResult", back_populates="observation", cascade="all, delete-orphan")
-    observer = relationship("Staff", back_populates="observations", foreign_keys=[observer_id])
-    trainer = relationship("Staff", back_populates="observations", foreign_keys=[trainer_id])
+    observer = relationship("Staff", back_populates="observer_observations", foreign_keys=[observer_id])
+    trainer = relationship("Staff", back_populates="trainer_observations", foreign_keys=[trainer_id])
     farmer_group = relationship("FarmerGroup", back_populates="observations")
     training_session = relationship("TrainingSession", back_populates="observation")
-    
+    checks = relationship("Check", back_populates="observation")

@@ -43,6 +43,6 @@ class Household(Base, AuditMixin, SFIDMixin, SoftDeleteMixin, TimestampMixin, UU
     
     # Relationships
     farmers = relationship("Farmer", back_populates="household")
-    farmer_groups = relationship("FarmerGroup", back_populates="households")
+    farmer_group = relationship("FarmerGroup", back_populates="households")
     farms = relationship("Farm", back_populates="household")
     farm_visits = relationship("FarmVisit", back_populates="visited_household")

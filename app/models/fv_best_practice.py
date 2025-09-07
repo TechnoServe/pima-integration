@@ -32,3 +32,4 @@ class FVBestPractice(Base, AuditMixin, SFIDMixin, SoftDeleteMixin, TimestampMixi
     
     # Relationships
     farm_visit = relationship("FarmVisit", back_populates="fv_best_practices")
+    fv_best_practice_answers = relationship("FVBestPracticeAnswer", back_populates="fv_best_practice")

@@ -50,9 +50,10 @@ class TrainingSession(Base, AuditMixin, SoftDeleteMixin, TimestampMixin, UUIDMix
     
     # Relationships
     trainer = relationship("Staff", back_populates="training_sessions")
-    module = relationship("TrainingModule", back_populates="training_sessions")
+    training_module = relationship("TrainingModule", back_populates="training_sessions")
     farmer_group = relationship("FarmerGroup", back_populates="training_sessions")
     attendance = relationship("Attendance", back_populates="training_session")
     farm_visit = relationship("FarmVisit", back_populates="training_session")
     checks = relationship("Check", back_populates="training_session")
     observation = relationship("Observation", back_populates="training_session")
+    attendances = relationship("Attendance", back_populates="training_session")

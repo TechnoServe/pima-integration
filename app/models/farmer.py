@@ -49,3 +49,6 @@ class Farmer(Base, AuditMixin, SFIDMixin, SoftDeleteMixin, TimestampMixin, UUIDM
     farmer_group = relationship("FarmerGroup", back_populates="farmers")
     household = relationship("Household", back_populates="farmers")
     attendances = relationship("Attendance", back_populates="farmer")
+    farm_visits_primary_farmer = relationship("FarmVisit", back_populates="primary_farmer", foreign_keys="FarmVisit.visited_primary_farmer_id")
+    farm_visits_secondary_farmer = relationship("FarmVisit", back_populates="secondary_farmer", foreign_keys="FarmVisit.visited_secondary_farmer_id")
+    checks = relationship("Check", back_populates="farmer")

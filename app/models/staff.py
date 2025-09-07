@@ -32,5 +32,11 @@ class Staff(Base, AuditMixin, SFIDMixin, SoftDeleteMixin, TimestampMixin, UUIDMi
     
     # Relationships
     project_staff_roles = relationship("ProjectStaffRole", back_populates="staff")
-    manager = relationship("Location", remote_side="Staff.id", back_populates="subordinates")
-    subordinates = relationship("Location", back_populates="manager", cascade="all, delete-orphan")
+    manager = relationship("Staff", remote_side="Staff.id", back_populates="subordinates")
+    subordinates = relationship("Staff", back_populates="manager", cascade="all, delete-orphan")
+    farmer_groups = relationship("FarmerGroup", back_populates="responsible_staff")
+    training_sessions = relationship("TrainingSession", back_populates="trainer")
+    observer_observations = relationship("Observation", back_populates="observer", foreign_keys="Observation.observer_id")
+    trainer_observations = relationship("Observation", back_populates="trainer", foreign_keys="Observation.trainer_id")
+    farm_visits = relationship("FarmVisit", back_populates="visiting_staff")
+    checks = relationship("Check", back_populates="checker")

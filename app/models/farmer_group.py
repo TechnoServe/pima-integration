@@ -44,3 +44,4 @@ class FarmerGroup(Base, AuditMixin, SFIDMixin, TimestampMixin, UUIDMixin, SoftDe
     farmers = relationship("Farmer", back_populates="farmer_group")
     households = relationship("Household", back_populates="farmer_group")
     training_sessions = relationship("TrainingSession", back_populates="farmer_group")
+    observations = relationship("Observation", back_populates="farmer_group")

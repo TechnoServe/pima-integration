@@ -1,8 +1,7 @@
 from sqlalchemy.orm import Session
-from models.staff import Staff
 
-def resolve_staff_id(session: Session, external_id: str):
-    staff = session.query(Staff).filter_by(sf_id=external_id).first()
-    if staff:
-        return staff.id
+def resolve_id(session: Session, external_id: str, table):
+    entity = session.query(table).filter_by(sf_id=external_id).first()
+    if entity:
+        return entity.id
     return None

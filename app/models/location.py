@@ -28,3 +28,5 @@ class Location(Base, AuditMixin, SFIDMixin, SoftDeleteMixin, TimestampMixin, UUI
     # Relationships
     parent_location = relationship("Location", remote_side="Location.id", back_populates="child_locations")
     child_locations = relationship("Location", back_populates="parent_location", cascade="all, delete-orphan")
+    farmer_groups = relationship("FarmerGroup", back_populates="location")
+    projects = relationship("Project", back_populates="location")

@@ -36,6 +36,3 @@ class Attendance(Base, AuditMixin, SoftDeleteMixin, TimestampMixin, UUIDMixin, S
     # Relationships
     farmer = relationship("Farmer", back_populates="attendances")
     training_session = relationship("TrainingSession", back_populates="attendances")
-    
-    
-    

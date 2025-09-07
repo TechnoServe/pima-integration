@@ -32,3 +32,4 @@ class Project(Base, AuditMixin, SoftDeleteMixin, SFIDMixin, TimestampMixin, UUID
     project_staff_roles = relationship("ProjectStaffRole", back_populates="project")
     location = relationship("Location", back_populates="projects")
     program = relationship("Program", back_populates="projects")
+    training_modules = relationship("TrainingModule", back_populates="project")

@@ -19,10 +19,10 @@ class WetmillCreate(BaseModel):
     manager_name: str
     manager_role: str
     comments: Optional[str]
-    wetmill_counter: Optional[Decimal]
+    wetmill_counter: Optional[Decimal] = None
     ba_signature: str
     manager_signature: str
     tor_page_picture: str
     registration_date: date
     office_entrance_picture: Optional[str]
-    office_gps: Optional[str]
+    office_gps: Optional[object]

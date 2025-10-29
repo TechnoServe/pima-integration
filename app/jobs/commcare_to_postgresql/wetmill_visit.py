@@ -22,12 +22,12 @@ class WetmillVisitOrchestrator:
     def __init__(self, db: Session):
         self.db = db
         self.resolver = ForeignKeyResolver(self.db)
-        self.wetmill_visit_transformer = WetmillVisitTransformer(self.db)
+        self.wetmill_visit_transformer = WetmillVisitTransformer(self.resolver)
         self.wetmill_visit_service = WetmillVisitService(self.db)
-        self.wv_survey_response_transformer = WVSurveyResponseTransformer(self.db)
+        self.wv_survey_response_transformer = WVSurveyResponseTransformer(self.resolver)
         self.wv_survey_response_service = WVSurveyResponseService(self.db)
         self.wv_survey_question_response_transformer = (
-            WVSurveyQuestionResponseTransformer(self.db)
+            WVSurveyQuestionResponseTransformer(self.resolver)
         )
         self.wv_survey_question_response_service = WVSurveyQuestionResponseService(
             self.db
@@ -109,6 +109,8 @@ class WetmillVisitOrchestrator:
             # Insert question responses
             for section, sec_content in content.items():
                 # handle multiple answers questions on top level
+                if section == "general_feedback":
+                    continue
                 if isinstance(sec_content, list):
                     for item in sec_content:
                         item_index = str(sec_content.index(item) + 1)
@@ -131,6 +133,8 @@ class WetmillVisitOrchestrator:
                         # handle multiple answers questions in nested
                         if isinstance(ans, list):
                             for item in ans:
+                                if q_name == "general_feedback":
+                                    continue
                                 item_index = str(ans.index(item) + 1)  # 1-based index
                                 submission_id = f"SQR-{payload.get("id")}-{survey_name}-{section}-{q_name}-{item_index}"
                                 self.process_survey_question_response(
@@ -144,7 +148,7 @@ class WetmillVisitOrchestrator:
                                 )
                         else:
                             # Skip label fields
-                            if q_name.endswith("_label"):
+                            if q_name.endswith("_label") or q_name == "general_feedback":
                                 continue
                             submission_id = f"SQR-{payload.get("id")}-{survey_name}-{section}-{q_name}"
                             self.process_survey_question_response(
@@ -159,9 +163,10 @@ class WetmillVisitOrchestrator:
                 # Single value questions or flags
                 else:
                     # Skip top-level label or survey keys
-                    if section.endswith("_label") or section.startswith("survey_"):
+                    if section.endswith("_label") or section.startswith("survey_") or section == "general_feedback":
                         continue
                     submission_id = f"SQR-{payload.get("id")}-{survey_name}-{section}"
+                    print("Passing through this. . .")
                     self.process_survey_question_response(
                         payload=payload,
                         survey_type=survey_name,

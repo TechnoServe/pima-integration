@@ -1,7 +1,4 @@
-from core import (
-    SessionLocal,
-    logger,
-)
+from core import logger
 from schemas import WetmillVisitCreate
 from models import Wetmill
 from services import ForeignKeyResolver
@@ -12,8 +9,8 @@ from shapely.geometry import Point
 
 
 class WetmillVisitTransformer:
-    def __init__(self, db=SessionLocal):
-        self.resolver = ForeignKeyResolver(db)
+    def __init__(self, resolver: ForeignKeyResolver):
+        self.resolver = resolver
 
     def transform(self, payload: dict) -> WetmillVisitCreate:
         """Transform CommCare payload to TrainingSessionCreate schema"""

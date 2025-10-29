@@ -9,5 +9,5 @@ class WetmillVisitCreate(BaseModel):
     form_name: str
     visit_date: date
     entrance_photograph: str
-    geo_location: str
+    geo_location: object
     submission_id: str

@@ -1,5 +1,4 @@
 from core import (
-    SessionLocal,
     logger,
     map_status, map_mill_status, map_manager_role, EXPORTING_STATUS_MAP, MANAGER_ROLE_MAP, WET_MILL_STATUS_MAP, VERTICAL_INTEGRATION_MAP
 )
@@ -12,8 +11,8 @@ from shapely.geometry import Point
 
 
 class WetmillTransformer:
-    def __init__(self, db=SessionLocal):
-        self.resolver = ForeignKeyResolver(db)
+    def __init__(self, resolver: ForeignKeyResolver):
+        self.resolver = resolver
 
     def transform(self, payload: dict) -> WetmillCreate:
         """Transform CommCare payload to WetmillCreate schema"""

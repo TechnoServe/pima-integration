@@ -9,7 +9,7 @@ class WetmillRegistrationOrchestrator:
     def __init__(self, db: Session):
         self.db = db
         self.resolver = ForeignKeyResolver(self.db)
-        self.wetmill_registration_transformer = WetmillTransformer(self.db)
+        self.wetmill_registration_transformer = WetmillTransformer(self.resolver)
         self.wetmill_registration_service = WetmillService(self.db)
 
     def process_data(self, raw_payload: dict, created_by_id: str):

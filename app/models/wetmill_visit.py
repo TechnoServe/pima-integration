@@ -34,6 +34,6 @@ class WetmillVisit(Base, SoftDeleteMixin, TimestampMixin, UUIDMixin, AuditMixin)
     # Relationship to wetmill and surveys
     wetmill = relationship("Wetmill", back_populates="visits")
     surveys = relationship(
-        "SurveyResponse", back_populates="form_visit", cascade="all, delete-orphan"
+        "WVSurveyResponse", back_populates="form_visit", cascade="all, delete-orphan"
     )
-    submitter = relationship("User", back_populates="wetmill_visits")
+    submitter = relationship("User", back_populates="wetmill_visits", foreign_keys=[user_id])

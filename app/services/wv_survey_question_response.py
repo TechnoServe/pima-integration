@@ -64,9 +64,6 @@ class WVSurveyQuestionResponseService:
             created_by_id=created_by_id,
             last_updated_by_id=created_by_id,
         )
-        
-        print(f"DATA: {str(data)}")
-        print(f"CREATED BY: {created_by_id}")
 
         try:
             self.db.add(survey_question_response)

@@ -1,43 +1,66 @@
 from sqlalchemy.orm import Session
-import datetime
-from models.training_session import TrainingSession
-from models.staff import Staff
-from schemas.training_session import TrainingSessionSchema
-from services.resolvers import resolve_id
-import uuid
-from dotenv import load_dotenv
-import os
-load_dotenv
+from models import TrainingSession
+from schemas import TrainingSessionCreate
+from core import logger
 
-SYSTEM_ID = os.getenv('SYSTEM_ID')
 
-def upsert_training_session(session: Session, schema: TrainingSessionSchema) -> TrainingSession:
-    """
-    Upsert a TrainingSession record using commcare_case_id as unique key.
-    """
-    
-    # Check for existing record
-    existing = (
-        session.query(TrainingSession)
-        .filter_by(commcare_case_id=schema.commcare_case_id)
-        .first()
-    )
+class TrainingSessionService:
+    """Handles database operations for training sessions"""
 
-    # Update Exisiting Record
-    if existing:
-        updates = schema.model_dump(exclude_unset=True)
-        for field, value in updates.items():
-            setattr(existing, field, value)
+    def __init__(self, db: Session):
+        self.db = db
 
-        existing.trainer_id = resolve_id(session, schema.commcare_case_id, Staff)
-        existing.last_updated_by = uuid.UUID(SYSTEM_ID)  # System user
-        session.add(existing)
+    def upsert(
+        self, data: TrainingSessionCreate, updated_by_id: str
+    ) -> TrainingSession:
+        """Update training session data (strict: must already exist)"""
+
+        # Look up existing training session
+        existing = (
+            self.db.query(TrainingSession)
+            .filter(
+                TrainingSession.commcare_case_id == data.commcare_case_id,
+                TrainingSession.is_deleted == False,
+            )
+            .first()
+        )
+
+        if not existing:
+
+            logger.error(
+                {"message": f"Training session not found: {data.commcare_case_id}"}
+            )
+            raise ValueError(
+                f"Training session not found for case ID: {data.commcare_case_id}"
+            )
+
+        logger.info(
+            {"message": f"Updating existing training session: {data.commcare_case_id}"}
+        )
+        return self._update_existing(existing, data, updated_by_id)
+
+    def _update_existing(
+        self, existing: TrainingSession, data: TrainingSessionCreate, updated_by_id: str
+    ) -> TrainingSession:
+        """Update existing training session with smart merging"""
+
+        # Smart update: don't overwrite existing data with None values
+        for field, value in data.model_dump(exclude_unset=True).items():
+            if field in [
+                "trainer_id",
+                "module_id",
+                "farmer_group_id",
+                "commcare_case_id",
+            ]:
+                # Always update core fields
+                setattr(existing, field, value)
+            elif value is not None:
+                current_value = getattr(existing, field, None)
+                if current_value is None or value != current_value:
+                    setattr(existing, field, value)
+
+        existing.last_updated_by_id = updated_by_id
+
+        self.db.commit()
+        self.db.refresh(existing)
         return existing
-
-    # Create New Record
-    else:
-        new_record = TrainingSession(**schema.model_dump(exclude_unset=True))
-        new_record.created_by = uuid.UUID(SYSTEM_ID)  # System user
-        new_record.last_updated_by = uuid.UUID(SYSTEM_ID)  # System user
-        session.add(new_record)
-        return new_record

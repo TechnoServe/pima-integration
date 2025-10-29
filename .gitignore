@@ -3,3 +3,9 @@
 **__pycache__
 *env.py
 alembic.ini
+.pylintrc
+Dockerfile
+seed_pima_fake_data.py
+.vscode
+alembic
+application_default_credentials.json

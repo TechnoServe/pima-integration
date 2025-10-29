@@ -16,7 +16,7 @@ engine = create_engine(DATABASE_URL, echo=False)
 SessionLocal = sessionmaker(bind=engine)
 
 # Import Base AFTER engine is defined
-from models.base import Base   # or adjust depending on where Base lives
+from models import Base   # or adjust depending on where Base lives
 
 
 def init_db():

@@ -7,18 +7,22 @@ import os
 cloud_logging_client = cloud_logging.Client()
 cloud_handler = cloud_logging.handlers.CloudLoggingHandler(cloud_logging_client)
 
+
 # Custom JSON Formatter for Structured Logging
 class JSONFormatter(logging.Formatter):
+    """JSON formatter for the logging util"""
+
     def format(self, record):
-        # Create a structured JSON log record
         log_record = {
-            "message": record.getMessage(),
             "severity": record.levelname,
         }
-        # Include extra fields if provided
-        if hasattr(record, "extra"):
-            log_record.update(record.extra)
+        if isinstance(record.msg, dict):
+            # If user passed a dict, merge it directly
+            log_record.update(record.msg)
+        else:
+            log_record["message"] = record.getMessage()
         return json.dumps(log_record)
+
 
 formatter = JSONFormatter()
 cloud_handler.setFormatter(formatter)
@@ -35,7 +39,9 @@ else:
     logger.addHandler(console_handler)
 
 # Log initialization message
-logger.info({
-    "message": "Logging configuration initialized",
-    "environment": "Cloud Run" if "K_SERVICE" in os.environ else "Local"
-})
+logger.info(
+    {
+        "message": "Logging configuration initialized",
+        "environment": "Cloud Run" if "K_SERVICE" in os.environ else "Local",
+    }
+)

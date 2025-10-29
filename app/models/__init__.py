@@ -1,5 +1,7 @@
+"""Init file for centralizing SQLAlchemy ORM models"""
+
+from .base import Base
 from .user import User
-from .staff import Staff
 from .farmer_group import FarmerGroup
 from .training_module import TrainingModule
 from .training_session import TrainingSession
@@ -19,4 +21,11 @@ from .household import Household
 from .image import Image
 from .observation_result import ObservationResult
 from .program import Program
+from .wetmill import Wetmill
+from .wetmill_visit import WetmillVisit
+from .wv_survey_response import WVSurveyResponse
+from .wv_survey_question_response import WVSurveyQuestionResponse
 
+# from .fv_question_answer import FVQuestionAnswer
+
+print("Imported models successfully")

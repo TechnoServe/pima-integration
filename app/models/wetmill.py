@@ -50,4 +50,4 @@ class Wetmill(Base, SoftDeleteMixin, TimestampMixin, UUIDMixin, AuditMixin):
     visits = relationship(
         "WetmillVisit", back_populates="wetmill", cascade="all, delete-orphan"
     )
-    submitter = relationship("User", back_populates="wetmills", foreign_keys=[user_id])
+    submitter = relationship("User", back_populates="wetmills")

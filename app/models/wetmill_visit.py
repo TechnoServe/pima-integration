@@ -24,7 +24,7 @@ class WetmillVisit(Base, SoftDeleteMixin, TimestampMixin, UUIDMixin, AuditMixin)
 
     # Fields
     wetmill_id = Column(UUID(as_uuid=True), ForeignKey(f"{SCHEMA}.wetmills.id"), nullable=True)
-    user_id = Column(UUID(as_uuid=True), nullable=True)
+    user_id = Column(UUID(as_uuid=True), ForeignKey(f"{SCHEMA}.users.id"), nullable=True)
     form_name = Column(String, nullable=False)
     visit_date = Column(Date, nullable=False)
     entrance_photograph = Column(String, nullable=True)
@@ -36,4 +36,4 @@ class WetmillVisit(Base, SoftDeleteMixin, TimestampMixin, UUIDMixin, AuditMixin)
     surveys = relationship(
         "SurveyResponse", back_populates="form_visit", cascade="all, delete-orphan"
     )
-    submitter = relationship("User", back_populates="wetmill_visits", foreign_keys=[user_id])
+    submitter = relationship("User", back_populates="wetmill_visits")

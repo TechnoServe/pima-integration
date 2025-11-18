@@ -1,0 +1,49 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "mypima-backend"
+version = "0.1.0"
+description = "MyPIMA backend"
+requires-python = ">=3.10"
+authors = [{ name = "Yves Mugenga" }]
+
+# Comment this if README.md isn't present at install time
+readme = { file = "README.md", content-type = "text/markdown" }
+
+# Use SPDX string (no deprecation warning)
+license = "MIT"
+
+dependencies = [
+  "python-dotenv>=0.19.0",
+  "google-cloud-logging",
+  "SQLAlchemy>=1.4.0",
+  "psycopg2-binary>=2.9.0",
+  "alembic>=1.7.0",
+  "google-cloud-firestore",
+  "pydantic>=1.8.0",
+  "Flask[async]>=3.0.3",
+  "requests",
+  "aiohttp",
+  "httpx",
+  "geoalchemy2>=0.13",
+  "shapely",
+]
+
+[project.optional-dependencies]
+dev = ["pytest", "pytest-mock"]
+
+[tool.setuptools]
+# Install only your Python package; exclude Alembic/migrations from packaging.
+packages = ["app"]
+include-package-data = true
+package-dir = {"" = "."}
+
+[tool.setuptools.package-data]
+app = ["**/*.sql", "**/*.yaml", "**/*.yml", "**/*.json"]
+
+[tool.pytest.ini_options]
+minversion = "8.0"
+addopts = "-ra -q"
+testpaths = ["tests"]

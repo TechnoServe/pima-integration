@@ -6,7 +6,11 @@ from transformations import AttendanceTransformer
 from models import Farmer
 from core import logger
 from jobs.commcare_to_postgresql.attendance_light import AttendanceLightOrchestrator
+from dataclasses import dataclass
 
+@dataclass
+class finalResult:
+    id: list
 
 class AttendanceFullOrchestrator:
     """Orchestrates the entire ingestion process"""
@@ -32,7 +36,7 @@ class AttendanceFullOrchestrator:
             created_by_id=created_by_id,
         )
 
-    def process_attendance(self, payload: dict, id_column, created_by_id: str):
+    def process_attendance(self, payload: dict, id_column, created_by_id: str) -> object:
         """Complete workflow for processing attendance payload"""
 
         FARMER_ID = {
@@ -73,8 +77,10 @@ class AttendanceFullOrchestrator:
                             "message": f"Upserted attendance with record ID: '{result.id}'"
                         }
                     )
-
-            return results
+                    
+            final_result = finalResult(id=results)
+            
+            return final_result
 
         except ValueError as e:
             self.db.rollback()

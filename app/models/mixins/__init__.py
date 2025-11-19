@@ -6,4 +6,4 @@ from .soft_delete import SoftDeleteMixin
 from .timestamp import TimestampMixin
 from .uuid import UUIDMixin
 
-print("Successfully imported all centralized model Mixins")
+print("Imported all centralized model mixins successfully!")

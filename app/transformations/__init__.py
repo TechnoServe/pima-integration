@@ -18,4 +18,4 @@ from .wv_survey_response import WVSurveyResponseTransformer
 from .wv_survey_question_response import WVSurveyQuestionResponseTransformer
 from .wetmill import WetmillTransformer
 
-print("Successfully imported all transformation classes")
+print("Imported all transformation classes successfully!")

@@ -123,10 +123,36 @@ class FarmVisitOrchestrator:
             # Step 6: Upsert other fv questions and answers
             other_fv_questions: dict = payload.get("form", {})
             fv_questions = {}
-            for question, answer in other_fv_questions.items():
-                if question not in FV_QUESTIONS_IGNORE_LIST:
-                    fv_questions.update({question: answer})
-                elif "signature" in question:
+
+            def flatten_dict(d, parent_key="", result=None):
+                if result is None:
+                    result = {}
+
+                for key, value in d.items():
+                    new_key = f"{parent_key}-{key}" if parent_key else key
+
+                    if isinstance(value, dict):
+                        flatten_dict(value, new_key, result)
+
+                    elif isinstance(value, list):
+                        for i, item in enumerate(value):
+                            if isinstance(item, dict):
+                                flatten_dict(item, new_key, result)
+                            else:
+                                result[f"{new_key}-{i}"] = item
+
+                    else:
+                        result[new_key] = value
+
+                return result
+
+
+            for question, value in other_fv_questions.items():
+                # Skip ignored questions entirely
+                if question in FV_QUESTIONS_IGNORE_LIST or question.endswith("_"):
+                    continue
+
+                if "signature" in question:
                     image_url = (
                         payload.get("attachments", {})
                         .get(payload.get("form", {}).get(question, ""), {})
@@ -139,8 +165,21 @@ class FarmVisitOrchestrator:
                         image_description=question,
                         created_by_id=created_by_id,
                     )
-                else:
                     continue
+
+                # Flatten
+                flattened = flatten_dict({question: value})
+
+                # Filter out keys containing ignored text
+                cleaned = {
+                    k: v
+                    for k, v in flattened.items()
+                    if not any(ignore_key in k for ignore_key in FV_QUESTIONS_IGNORE_LIST)
+                }
+
+                fv_questions.update(cleaned)
+
+
             if fv_questions:
                 self.process_fv_best_practice(
                     raw_payload=raw_payload,
@@ -167,7 +206,7 @@ class FarmVisitOrchestrator:
                 elif isinstance(fis_questions, dict):
                     self.process_fis_farm(
                         raw_payload=raw_payload,
-                        cleaned_payload=farm,
+                        cleaned_payload=fis_questions,
                         created_by_id=created_by_id,
                     )
 
@@ -234,6 +273,11 @@ class FarmVisitOrchestrator:
 
             if best_practice_answers:
                 for question, answer in best_practice_answers.items():
+                    other = None
+                    if best_practice_answers.get(f"{question}_other"):
+                        other = best_practice_answers.get(f"{question}_other")
+                    if best_practice_answers.get(f"other_{question}"):
+                        other = best_practice_answers.get(f"other_{question}")
                     if any(word in question.lower() for word in ["photo", "image"]):
                         continue
                     elif question in FV_BP_MULTISELECT:
@@ -245,6 +289,7 @@ class FarmVisitOrchestrator:
                                 bp_question=question,
                                 bp_answer=ans,
                                 multiselect=True,
+                                other=other,
                                 created_by_id=created_by_id,
                             )
                     else:
@@ -254,6 +299,7 @@ class FarmVisitOrchestrator:
                             bp_question=question,
                             bp_answer=answer,
                             multiselect=False,
+                            other=other,
                             created_by_id=created_by_id,
                         )
 
@@ -302,6 +348,7 @@ class FarmVisitOrchestrator:
         bp_question: str,
         bp_answer: str,
         multiselect: bool,
+        other: str,
         created_by_id: str,
     ) -> FVBestPracticeAnswer:
         """Function to process the best practice answers"""
@@ -311,7 +358,7 @@ class FarmVisitOrchestrator:
 
             # Step 2: Transform payload (includes foreign key resolution)
             transformed_data = self.fv_best_practice_answer_transformer.transform(
-                payload, bp, bp_question, bp_answer, multiselect
+                payload, bp, bp_question, bp_answer, multiselect, other
             )
 
             # Step 3: Upsert to database

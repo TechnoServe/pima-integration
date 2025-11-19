@@ -180,6 +180,7 @@ FV_QUESTIONS_IGNORE_LIST = [
     "secondary_farmer_available",
     "signature_of_farmer",
     "signature_of_farmer_trainer",
+    "signature_of_agronomy_advisor",
     "survey_type",
     "trainer",
     "training_session",
@@ -187,6 +188,9 @@ FV_QUESTIONS_IGNORE_LIST = [
     "best_practice_questions",
     "survey_type_2",
     "updated_fis_list",
+    "instruction____you_will_now_proceed_ask_the_farmers_about_their_attendance_",
+    "count_selected_farmers",
+    "household_tns_id"
 ]
 
 FV_QUESTIONS_MAPPINGS = {
@@ -202,8 +206,17 @@ FV_QUESTIONS_MAPPINGS = {
         "1": "Natural woodland or forest",
         "2": "Eucalyptus or other tree plantation",
         "0": "No sign the field(s) was previously woodland or forest.",
-    },
+    }
 }
+
+YN = {
+    "1": True,
+    "0": False
+}
+
+YN_QUESTIONS = [
+    "attended_training"
+]
 
 FV_BP_VISIT_TYPE_FILTER = [
     "type_chemical_applied_on_coffee_last_12_months",
@@ -483,6 +496,20 @@ FV_BP_MAPPINGS = {
         "2": "Products containing Propiconazole which includes Tilt?",
         "3": "None of the products used",
     },
+    
+    # 12. Kitchen garden
+    "is_there_a_kitchen_garden" : {
+        "1": "Yes. There is a kitchen garden on the farm",
+        "0": "No kitchen garden planted"
+    },
+    
+    "vegetables_planted": {
+        "1": "Carrots",
+        "2": "Beetroot",
+        "3": "Swiss chard",
+        "4": "Kale",
+        "99": "Other"
+    }
 }
 
 FV_BP_TYPE = {

@@ -8,6 +8,8 @@ from core import (
     FV_BP_VISIT_TYPE_FILTER,
     FV_STUMPING_PROGRAM_FILTER,
     FV_QUESTIONS_MAPPINGS,
+    YN,
+    YN_QUESTIONS
 )
 from pydantic import ValidationError
 
@@ -25,12 +27,13 @@ class FVBestPracticeAnswerTransformer:
         bp_question: str,
         bp_answer: str,
         multiselect: bool,
+        other: str
     ) -> FVBestPracticeAnswerCreate:
         """Transform CommCare payload to FVBestPracticeAnswerCreate schema"""
         try:
 
             session_data = self._map_fv_best_practice_answer_data(
-                payload, bp_question, bp_answer, multiselect
+                payload, bp_question, bp_answer, multiselect, other
             )
 
             # print(f"Final Session Data: {dict(session_data)}")
@@ -53,7 +56,7 @@ class FVBestPracticeAnswerTransformer:
             raise ValueError(f"Schema validation failed: {str(e.errors())}") from e
 
     def _map_fv_best_practice_answer_data(
-        self, payload: Dict, bp_question: str, bp_answer: str, multiselect: bool
+        self, payload: Dict, bp_question: str, bp_answer: str, multiselect: bool, other: str
     ) -> Dict[str, Any]:
         """Map fv_best_practice_answer data"""
         visit_type = payload.get("form", {}).get("survey_type", "")
@@ -68,6 +71,7 @@ class FVBestPracticeAnswerTransformer:
                 .get(visit_type, {})
                 .get(bp_answer, "")
             )
+            answer = f"Other: {other}" if answer == "Other" else answer
 
         # Special stumping year case
         elif bp_question == "year_stumping":
@@ -80,12 +84,17 @@ class FVBestPracticeAnswerTransformer:
             bp_question in FV_BP_MAPPINGS and bp_question not in FV_BP_VISIT_TYPE_FILTER
         ):
             answer = FV_BP_MAPPINGS.get(bp_question, {}).get(bp_answer, "")
+            answer = f"Other: {other}" if answer == "Other" else answer
             if answer in ["Yes", "No"]:
                 answer_boolean = answer == "Yes"
                 answer = None
 
         elif bp_question in FV_QUESTIONS_MAPPINGS:
             answer = FV_QUESTIONS_MAPPINGS.get(bp_question, {}).get(bp_answer, "")
+            answer = f"Other: {other}" if answer == "Other" else answer
+        
+        elif bp_question.endswith(tuple(YN_QUESTIONS)):
+            answer_boolean = YN.get(bp_answer)
 
         elif not any(word in bp_question.lower() for word in ["photo", "image"]):
             try:

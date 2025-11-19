@@ -75,7 +75,7 @@ class ObservationTransformer:
                     observer_id=observer_id,
                     farmer_group_id=farmer_group_id,
                     **session_data,
-                ).id
+                )
 
             # return ObservationCreate(**session_data)
 

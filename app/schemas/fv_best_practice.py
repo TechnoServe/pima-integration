@@ -19,6 +19,6 @@ class FVBestPracticeCreate(BaseModel):
         "Pesticide Use",
         "Record Keeping",
         "Health of New Planting",
-        "Other FV Questions"
+        "General FV Questions"
     ]
     is_bp_verified: bool

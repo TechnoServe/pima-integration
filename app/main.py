@@ -7,7 +7,7 @@ from core import (
     save_to_firestore,
     update_firestore_status,
     init_fs_db,
-    MIGRATED_FORM_TYPES
+    MIGRATED_FORM_TYPES,
 )
 from jobs.commcare_to_postgresql import (
     AttendanceFullOrchestrator as AFJob,
@@ -16,7 +16,7 @@ from jobs.commcare_to_postgresql import (
     FarmVisitOrchestrator as FVJob,
     ParticipantRegistrationAndUpdateOrchestrator as PJob,
     WetmillRegistrationOrchestrator as WRJob,
-    WetmillVisitOrchestrator as WVJob
+    WetmillVisitOrchestrator as WVJob,
 )
 from google.cloud.firestore import FieldFilter
 from google.cloud import firestore
@@ -24,7 +24,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-SYSTEM_ID = os.getenv("SYSTEM_USER_ID_TEST") # Change when deploying to GCP
+SYSTEM_ID = os.getenv("SYSTEM_USER_ID_TEST")  # Change when deploying to GCP
 MAX_RETRIES = 3
 
 app = Flask(__name__)
@@ -51,8 +51,8 @@ job_mapping = {
     "Farm Visit - AA": FVJob,
     "Field Day Farmer Registration": PJob,
     "Field Day Attendance Full": AFJob,
-    "Wet Mill Registration Form": WRJob, 
-    "Wet Mill Visit": WVJob
+    "Wet Mill Registration Form": WRJob,
+    "Wet Mill Visit": WVJob,
 }
 
 
@@ -98,15 +98,36 @@ def save_payload(source: str):
             else:
                 doc_id = save_to_firestore(payload, job_name, "new", collection)
 
-            logger.info({"message": "Payload stored", "job_name": job_name})
+            logger.info(
+                {
+                    "message": "Payload stored",
+                    "job_name": job_name,
+                    "doc_id": doc_id,
+                    "job_id": request_id,
+                }
+            )
         else:
-            logger.warning({"message": "Job skipped", "job_name": job_name})
+            logger.warning(
+                {"message": "Job skipped", "job_name": job_name, "job_id": request_id}
+            )
 
     except Exception as e:
-        logger.error({"message": "Failed to save payload", "error": str(e)})
+        logger.error(
+            {"message": "Failed to save payload", "job_id": request_id, "error": str(e)}
+        )
         return jsonify({"error": str(e)}), 500
 
-    return jsonify({"status": "stored", "job_name": job_name}), 200
+    return (
+        jsonify(
+            {
+                "status": "stored",
+                "job_name": job_name,
+                "doc_id": doc_id,
+                "job_id": request_id,
+            }
+        ),
+        200,
+    )
 
 
 # -------------------------------------
@@ -365,9 +386,10 @@ def _process_and_update_job(doc_id: str, data: dict, collection: str, is_retry=F
 
         return {
             "job_id": data.get("job_id"),
+            "job_type": data.get("job_name"),
             "status": "completed",
             "record_id": str(result.id),
-            "retries": fields.get("run_retries", data.get("run_retries", 0)),
+            "run_retries": fields.get("run_retries", data.get("run_retries", 0)),
         }
 
     except Exception as e:
@@ -386,6 +408,7 @@ def _process_and_update_job(doc_id: str, data: dict, collection: str, is_retry=F
         )
         return {
             "job_id": data.get("job_id"),
+            "job_type": data.get("job_name"),
             "status": "failed",
             "error": str(e),
             "run_retries": retries,
@@ -396,5 +419,6 @@ def _process_and_update_job(doc_id: str, data: dict, collection: str, is_retry=F
 # MAIN ENTRY
 # -------------------------------------
 if __name__ == "__main__":
+    main()
     print("Flask app running on port 8080...")
     app.run(host="0.0.0.0", port=8080, debug=True)

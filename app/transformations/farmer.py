@@ -18,7 +18,10 @@ class FarmerTransformer:
         try:
             # Resolve foreign keys first
             farmer_group_id = self.resolver.resolve_db_id(
-                
+                payload.get("form", {}).get("Training_Group_Id"),
+                FarmerGroup.commcare_case_id,
+                "Farmer Group",
+                FarmerGroup
             ).id
             household_id = self.resolver.resolve_db_id(
                 payload.get("form", {}).get("Household_Id"),

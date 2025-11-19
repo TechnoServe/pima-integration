@@ -9,3 +9,4 @@ seed_pima_fake_data.py
 .vscode
 alembic
 application_default_credentials.json
+mypima_backend.egg-info

@@ -6,13 +6,13 @@ from dotenv import load_dotenv
 # Load .env variables
 load_dotenv()
 
-DATABASE_URL = os.getenv("PG_LOCAL_DATABASE_URL")  # Local DB for development
+DATABASE_URL = os.getenv("PG_PROD_DATABASE_URL")  # Local DB for development
 
 if not DATABASE_URL:
-    raise ValueError("PG_LOCAL_DATABASE_URL not set in environment")
+    raise ValueError("PG_PROD_DATABASE_URL not set in environment")
 
 # SQLAlchemy engine and session
-engine = create_engine(DATABASE_URL, echo=False)
+engine = create_engine(DATABASE_URL, echo=False, pool_size=10, max_overflow=20)
 SessionLocal = sessionmaker(bind=engine)
 
 # Import Base AFTER engine is defined

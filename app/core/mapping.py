@@ -148,6 +148,7 @@ FV_BP_MULTISELECT = [
     "methods_of_erosion_control",
     "which_pests_cause_you_problems",
     "do_you_spray_any_of_the_following_on_your_farm_for_leaf_miner_or_rust",
+    "seedling_planting_and_survival-second_questions-species_distributed",
 ]
 
 FV_QUESTIONS_IGNORE_LIST = [
@@ -178,9 +179,9 @@ FV_QUESTIONS_IGNORE_LIST = [
     "secondary_farmer_fullname",
     "secondary_farmer_lastname",
     "secondary_farmer_available",
-    "signature_of_farmer",
-    "signature_of_farmer_trainer",
-    "signature_of_agronomy_advisor",
+    # "signature_of_farmer",
+    # "signature_of_farmer_trainer",
+    # "signature_of_agronomy_advisor",
     "survey_type",
     "trainer",
     "training_session",
@@ -190,7 +191,10 @@ FV_QUESTIONS_IGNORE_LIST = [
     "updated_fis_list",
     "instruction____you_will_now_proceed_ask_the_farmers_about_their_attendance_",
     "count_selected_farmers",
-    "household_tns_id"
+    "household_tns_id",
+    "households_completed_fis",
+    "households_completed_tree_backcheck",
+    "updated_tree_distribution_backcheck_list"
 ]
 
 FV_QUESTIONS_MAPPINGS = {
@@ -201,11 +205,28 @@ FV_QUESTIONS_MAPPINGS = {
         "3": "Batien",
         "4": "French mission/other",
     },
+    "seedling_planting_and_survival-second_questions-species_distributed":{
+        "1": "Cordia",
+        "2": "Markhamia",
+        "3": "Croton",
+        "4": "Prunus",
+        "5": "Albizia"     
+    },
     # Zimbabwe
     "planted_on_land_that_have_previously_been_planted_with_woodland_or_forest": {
         "1": "Natural woodland or forest",
         "2": "Eucalyptus or other tree plantation",
         "0": "No sign the field(s) was previously woodland or forest.",
+    },
+    "number_of_trees_confirmation-still_original_trees": {
+        "1": "Yes",
+        "0": "No"
+    },
+    "number_of_trees_confirmation-ask_what_happened_to_most_of_the_trees": {
+        "1": "Died due to lack of irrigation",
+        "2": "Died due to frost",
+        "3": "Died due to fire",
+        "99": "Other"
     }
 }
 
@@ -526,6 +547,7 @@ FV_BP_TYPE = {
     "safe_use_of_pesticides": "Pesticide Use",
     "health_of_new_planting": "Health of New Planting",
     "pesticide_use": "Pesticide Use",
+    "kitchen_garden": "Kitchen Garden",
     "other": "General FV Questions",
 }
 
@@ -747,6 +769,7 @@ WATER_MANAGEMENT_PULP_SEPARATION = {
     "1": "Pulp hopper",
     "2": "Re-circulation pump with skin tower",
     "eco-pulper": "Eco-pulper",
+    "4": "Large metal sifter or separator"
 }
 
 WATER_USE_METHODS = {

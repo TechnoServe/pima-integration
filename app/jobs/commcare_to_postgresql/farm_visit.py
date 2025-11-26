@@ -278,7 +278,11 @@ class FarmVisitOrchestrator:
                         other = best_practice_answers.get(f"{question}_other")
                     if best_practice_answers.get(f"other_{question}"):
                         other = best_practice_answers.get(f"other_{question}")
-                    if any(word in question.lower() for word in ["photo", "image"]):
+                    if best_practice_answers.get(f"{question}_specify"):
+                        other = best_practice_answers.get(f"{question}_specify")
+                    if best_practice_answers.get(f"specify_{question}"):
+                        other = best_practice_answers.get(f"specify_{question}")
+                    if any(word in question.lower() for word in ["photo", "image", "signature"]) or question.endswith("_other") or question.endswith("_specify") :
                         continue
                     elif question in FV_BP_MULTISELECT:
                         multiselect = answer.split(" ")
@@ -306,7 +310,7 @@ class FarmVisitOrchestrator:
             # Step 4: Upsert associated images if any
             if best_practice_answers:
                 for question, answer in best_practice_answers.items():
-                    if any(word in question.lower() for word in ["photo", "image"]):
+                    if any(word in question.lower() for word in ["photo", "image", "signature"]):
                         image_url: str = (
                             raw_payload.get("attachments", {})
                             .get(answer, {})

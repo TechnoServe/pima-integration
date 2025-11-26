@@ -145,7 +145,7 @@ def process_jobs(source: str):
     )
 
     if not docs:
-        return jsonify({"message": "No new jobs found"}), 404
+        return jsonify({"message": "No new jobs found"}), 200
 
     results = [
         _process_and_update_job(d.id, d.to_dict(), collection, is_retry=False)
@@ -200,6 +200,8 @@ def retry_job(source: str, job_id: str):
                 .limit(10)
                 .get()
             )
+            if not docs:
+                return jsonify({"error": "No jobs found to Auto retry"}), 200
 
         if not docs:
             return jsonify({"error": "No jobs found to retry"}), 404
@@ -316,6 +318,7 @@ def get_failed_jobs(source: str):
             "job_name": d.to_dict().get("job_name"),
             "run_retries": d.to_dict().get("run_retries"),
             "last_retried_at": d.to_dict().get("last_retried_at"),
+            "error": d.to_dict().get("error")
         }
         for d in docs
     ]

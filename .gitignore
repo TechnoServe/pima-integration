@@ -10,3 +10,5 @@ seed_pima_fake_data.py
 alembic
 application_default_credentials.json
 mypima_backend.egg-info
+migrations
+pyproject.toml

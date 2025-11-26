@@ -103,11 +103,11 @@ class HouseholdTransformer:
             "tns_id": payload.get("form", {}).get("Household_Id"),
             "number_of_trees": (
                 int(float(self._get_farm_size(payload)))
-                if country not in ["Ethiopia"]
+                if country not in ["Ethiopia"] and self._get_farm_size(payload)
                 else None
             ),
             "farm_size": (
-                float(self._get_farm_size(payload)) if country in ["Ethiopia"] else None
+                float(self._get_farm_size(payload)) if country in ["Ethiopia"] and self._get_farm_size(payload) else None
             ),
             "sampled_for_fv_aa": False,
             "farm_size_before": (
@@ -185,11 +185,11 @@ class HouseholdTransformer:
             "tns_id": payload.get("form", {}).get("Household_Id"),
             "number_of_trees": (
                 int(float(self._get_farm_size(payload)))
-                if country not in ["Ethiopia"]
+                if country not in ["Ethiopia"] and self._get_farm_size(payload)
                 else None
             ),
             "farm_size": (
-                float(self._get_farm_size(payload)) if country in ["Ethiopia"] else None
+                float(self._get_farm_size(payload)) if country in ["Ethiopia"] and self._get_farm_size(payload) else None
             ),
             "status": "Active",
         }

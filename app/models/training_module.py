@@ -41,7 +41,7 @@ class TrainingModule(
     module_number = Column(Integer, nullable=True)
     current_module = Column(Boolean, default=False, server_default=text("false"))
     current_previous = Column(
-        Enum("Current", "Previous", name="current_previous_enum", schema=SCHEMA), nullable=False
+        Enum("Current", "Previous", name="current_previous_enum", schema=SCHEMA), nullable=True
     )
     sample_fv_aa_households = Column(
         Boolean, default=False, server_default=text("false")

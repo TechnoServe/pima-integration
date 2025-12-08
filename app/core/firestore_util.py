@@ -72,3 +72,22 @@ def update_firestore_status(doc_id, status, collection, fields=None, db=None):
             }
         )
         raise
+
+def batch_update_firestore_status(docs, collection, status="processing", db=None):
+    if db is None:
+        db = init_db()
+    batch = db.batch()
+    ops = 0
+
+    for d in docs:
+        ref = db.collection(collection).document(d.id)
+        batch.update(ref, {"status": status})
+        ops += 1
+
+        if ops == 500:
+            batch.commit()
+            batch = db.batch()
+            ops = 0
+
+    if ops > 0:
+        batch.commit()

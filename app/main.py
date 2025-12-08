@@ -20,6 +20,7 @@ from jobs.commcare_to_postgresql import (
 )
 from google.cloud.firestore import FieldFilter
 from google.cloud import firestore
+from google.api_core.retry import Retry
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -146,7 +147,13 @@ def process_jobs(source: str):
 
     if not docs:
         return jsonify({"message": "No new jobs found"}), 200
-
+    
+    # Update to 'Processing'
+    for d in docs:
+        update_firestore_status(
+            doc_id=d.id, collection=collection, status="processing"
+        )
+        
     results = [
         _process_and_update_job(d.id, d.to_dict(), collection, is_retry=False)
         for d in docs
@@ -228,17 +235,24 @@ def status_count(source: str):
     """Summarize jobs by status"""
     collection = _get_collection(source)
     statuses = ["new", "processing", "failed", "completed"]
-
     summary = {}
-    for status in statuses:
-        count = (
-            fs_db.collection(collection)
-            .where(filter=FieldFilter("status", "==", status))
-            .get()
-        )
-        summary[status] = len(count)
+    try:
+        for status in statuses:
+            query = (
+                fs_db.collection(collection)
+                .where(filter=FieldFilter("status", "==", status))
+            )
 
-    return jsonify(summary), 200
+            result = query.count().get(retry=Retry(deadline=120))
+            summary[status] = result[0][0].value
+
+        return jsonify(summary), 200
+    except Exception as e:
+        logger.error(
+            {"message": "Failed to retrieve job statuses", "error": str(e)}
+        )
+        return jsonify({"error": str(e)}), 500
+ 
 
 
 # -----------------------------
@@ -318,7 +332,7 @@ def get_failed_jobs(source: str):
             "job_name": d.to_dict().get("job_name"),
             "run_retries": d.to_dict().get("run_retries"),
             "last_retried_at": d.to_dict().get("last_retried_at"),
-            "error": d.to_dict().get("error")
+            "error": d.to_dict().get("error"),
         }
         for d in docs
     ]

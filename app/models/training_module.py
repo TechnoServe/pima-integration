@@ -7,6 +7,7 @@ from sqlalchemy import (
     Enum,
     text,
     Index,
+    Date
 )
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
@@ -39,6 +40,7 @@ class TrainingModule(
     )
     module_name = Column(String, nullable=True)
     module_number = Column(Integer, nullable=True)
+    module_date = Column(Date, nullable=False)
     current_module = Column(Boolean, default=False, server_default=text("false"))
     current_previous = Column(
         Enum("Current", "Previous", name="current_previous_enum", schema=SCHEMA), nullable=True

@@ -8,9 +8,11 @@ from core import logger
 from jobs.commcare_to_postgresql.attendance_light import AttendanceLightOrchestrator
 from dataclasses import dataclass
 
+
 @dataclass
 class finalResult:
     id: list
+
 
 class AttendanceFullOrchestrator:
     """Orchestrates the entire ingestion process"""
@@ -28,7 +30,6 @@ class AttendanceFullOrchestrator:
         self.trainingsessionorchestrator.process_training_session(
             raw_payload=raw_payload, created_by_id=created_by_id
         )
-
         # 2. Process attendance data
         return self.process_attendance(
             payload=raw_payload,
@@ -36,33 +37,19 @@ class AttendanceFullOrchestrator:
             created_by_id=created_by_id,
         )
 
-    def process_attendance(self, payload: dict, id_column, created_by_id: str) -> object:
+    def process_attendance(
+        self, payload: dict, id_column, created_by_id: str
+    ) -> object:
         """Complete workflow for processing attendance payload"""
-
         FARMER_ID = {
-            "New Farmer New Household": payload.get("form", {})
-            .get("subcase_0", {})
-            .get("case", {})
-            .get("@case_id", ""),
-            "New Farmer Existing Household": payload.get("form", {})
-            .get("subcase_0", {})
-            .get("case", {})
-            .get("@case_id", ""),
-            "Existing Farmer Change in FFG": payload.get("form", {})
-            .get("existing_farmer_change_in_ffg", {})
-            .get("old_farmer_id"),
-            "Attendance Full - Current Module": payload.get("form", {}).get(
-                "present_participants", ""
-            ),
+            "New Farmer New Household": (payload.get("form", {}).get("subcase_0") or {}).get("case", {}).get("@case_id", ""),
+            "New Farmer Existing Household": (payload.get("form", {}).get("subcase_0") or {}).get("case", {}).get("@case_id", ""),
+            "Existing Farmer Change in FFG": payload.get("form", {}).get("existing_farmer_change_in_ffg", {}).get("old_farmer_id"),
+            "Attendance Full - Current Module": payload.get("form", {}).get("present_participants", "")
         }
-
         try:
-            farmer_external_ids = FARMER_ID.get(
-                payload.get("form", {}).get(
-                    "survey_detail", "Attendance Full - Current Module"
-                ),
-                "",
-            ).split()
+            farmer_external_ids = FARMER_ID.get((payload.get("form", {}).get("survey_detail", "Attendance Full - Current Module")),"").split()
+            print(f"Farmer IDs: {str(farmer_external_ids)}")
             results = []
             if farmer_external_ids:
                 for farmer_external_id in farmer_external_ids:
@@ -77,9 +64,8 @@ class AttendanceFullOrchestrator:
                             "message": f"Upserted attendance with record ID: '{result.id}'"
                         }
                     )
-                    
+
             final_result = finalResult(id=results)
-            
             return final_result
 
         except ValueError as e:

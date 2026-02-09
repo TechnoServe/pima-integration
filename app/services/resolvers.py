@@ -19,14 +19,11 @@ class ForeignKeyResolver:
 
         cache_key = f"{field}:{external_id}"
         if cache_key in self.cache:
-            logger.info(
-                {
-                    "message": f"Cached record for '{field}' with external ID '{external_id}'"
-                }
-            )
+            logger.info({"message": f"Cached record for '{field}' with external ID '{external_id}'"})
             return self.cache[cache_key]
 
         try:
+            # First attempt: match against the external ID column (e.g., sf_id)
             existing_record = (
                 self.db.query(model)
                 .filter(id_column == external_id, model.is_deleted == False)
@@ -35,22 +32,30 @@ class ForeignKeyResolver:
 
             if existing_record:
                 self.cache[cache_key] = existing_record
-                logger.info(
-                    {
-                        "message": f"Resolved {field}: external_id={external_id}, internal_id={existing_record.id}"
-                    }
-                )
+                logger.info({
+                    "message": f"Resolved {field}: external_id={external_id}, internal_id={existing_record.id}"
+                })
                 return existing_record
 
-            raise ValueError(
-                f"No record found for '{field}' with external ID '{external_id}'"
+            # Fallback: try direct primary key lookup
+            direct_record = (
+                self.db.query(model)
+                .filter(model.id == external_id, model.is_deleted == False)
+                .first()
             )
 
+            if direct_record:
+                self.cache[cache_key] = direct_record
+                logger.info({
+                    "message": f"Resolved {field} via direct ID: external_id={external_id}, internal_id={direct_record.id}"
+                })
+                return direct_record
+
+            raise ValueError(f"No record found for '{field}' with external ID '{external_id}'")
+
         except Exception as e:
-            logger.error(
-                {
-                    "message": f"Error while resolving '{field}' with external ID '{external_id}'",
-                    "error": str(e),
-                }
-            )
+            logger.error({
+                "message": f"Error while resolving '{field}' with external ID '{external_id}'",
+                "error": str(e),
+            })
             raise

@@ -21,7 +21,7 @@ class FarmerTransformer:
                 payload.get("form", {}).get("Training_Group_Id"),
                 FarmerGroup.commcare_case_id,
                 "Farmer Group",
-                FarmerGroup
+                FarmerGroup,
             ).id
             household_id = self.resolver.resolve_db_id(
                 payload.get("form", {}).get("Household_Id"),
@@ -99,6 +99,7 @@ class FarmerTransformer:
 
     def _map_farmer_registration_new_farmer(self, payload: Dict) -> Dict[str, Any]:
         """Map data for Farmer - Farmer Registration - NFNH, NFEH"""
+        general_feedback = payload.get("form", {}).get("general_feedback")
         primary_household_member = (
             payload.get("form", {}).get("Primary_Household_Member", "") == "Yes"
         )
@@ -117,12 +118,14 @@ class FarmerTransformer:
             "phone_number": payload.get("form", {}).get("Phone_Number", ""),
             "is_primary_household_member": primary_household_member,
             "status": "Active",
+            "status_notes": general_feedback if general_feedback else None,
             "send_to_commcare": False,
             "send_to_commcare_status": "Pending",
         }
 
     def _map_farmer_registration_change_ffg(self, payload: Dict) -> Dict[str, Any]:
         """Map data for Farmer - Farmer Registration - EFCF"""
+        general_feedback = payload.get("form", {}).get("general_feedback")
         primary_household_member = (
             payload.get("form", {}).get("Primary_Household_Member", "") == "Yes"
         )
@@ -131,9 +134,19 @@ class FarmerTransformer:
             "commcare_case_id": payload.get("form", {})
             .get("existing_farmer_change_in_ffg", {})
             .get("old_farmer_id"),
+            "first_name": payload.get("form", {}).get("First_Name"),
+            "middle_name": payload.get("form", {}).get("Middle_Name", ""),
+            "last_name": payload.get("form", {}).get("Last_Name"),
             "other_id": self._get_other_id_number(payload),
+            "gender": payload.get("form", {}).get("Gender"),
+            "age": int(payload.get("form", {}).get("Age")),
             "is_primary_household_member": primary_household_member,
             "status": "Active",
+            "status_notes": (
+                general_feedback
+                if general_feedback
+                else f'Changed FFG from {payload.get("form", {}).get("existing_farmer_change_in_ffg", {}).get("former_training_group_name")} [{payload.get("form", {}).get("existing_farmer_change_in_ffg", {}).get("old_farmer_ffg")}]'
+            ),
             "send_to_commcare": False,
             "send_to_commcare_status": "Pending",
         }
@@ -144,26 +157,32 @@ class FarmerTransformer:
             payload.get("form", {}).get("Primary_Household_Member", "") == "Yes"
         )
         return {
-            "tns_id": payload.get("form", {}).get("Farmer_Id"), # Not updated
-            "commcare_case_id": payload.get("form", {}) # Not updated
+            "tns_id": payload.get("form", {}).get("Farmer_Id"),  # Not updated
+            "commcare_case_id": payload.get("form", {})  # Not updated
             .get("case", {})
             .get("@case_id", ""),
-            "first_name": payload.get("form", {}).get("First_Name"), # Not updated
-            "middle_name": payload.get("form", {}).get("Middle_Name", ""), # Not updated
-            "last_name": payload.get("form", {}).get("Last_Name"), # Not updated
-            "other_id": self._get_other_id_number(payload), # Updated
-            "gender": payload.get("form", {}).get("Gender"), # Not updated
-            "age": int(payload.get("form", {}).get("Age")), # Not updated
-            "phone_number": payload.get("form", {}).get("Phone_Number", ""), # Updated
-            "is_primary_household_member": primary_household_member, # Not updated
-            "status": "Active", # Not updated
+            "first_name": payload.get("form", {}).get("First_Name"),  # Not updated
+            "middle_name": payload.get("form", {}).get(
+                "Middle_Name", ""
+            ),  # Not updated
+            "last_name": payload.get("form", {}).get("Last_Name"),  # Not updated
+            "other_id": self._get_other_id_number(payload),  # Updated
+            "gender": payload.get("form", {}).get("Gender"),  # Not updated
+            "age": int(payload.get("form", {}).get("Age")),  # Not updated
+            "phone_number": payload.get("form", {}).get("Phone_Number", ""),  # Updated
+            "is_primary_household_member": primary_household_member,  # Not updated
+            "status": "Active",  # Not updated
             "send_to_commcare": False,
-            "send_to_commcare_status": "Pending"
+            "send_to_commcare_status": "Pending",
         }
 
     def _map_farmer_registration_pr_fv(self, payload: Dict) -> Dict[str, Any]:
         """Map data for Farmer - Farmer Registration - PR Farm Visit"""
-        payload = payload.get("form", {}).get("participant_data", {}).get("farmer_registration_details", {})
+        payload = (
+            payload.get("form", {})
+            .get("participant_data", {})
+            .get("farmer_registration_details", {})
+        )
         return {
             "tns_id": payload.get("form", {}).get("Farmer_Id"),
             "commcare_case_id": payload.get("form", {})
@@ -200,6 +219,7 @@ class FarmerTransformer:
                             "Cooperative_Membership_Number", ""
                         ),
                         payload.get("form", {}).get("Grower_Number", ""),
+                        payload.get("form", {}).get("Kebele_Id", "")
                     ]
                     if value not in ["", None]
                 ),

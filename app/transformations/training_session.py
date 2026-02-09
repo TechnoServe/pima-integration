@@ -139,7 +139,7 @@ class TrainingSessionTransformer:
         """Map data for Attendance Full - FT (session 1 fields)"""
         return {
             "commcare_case_id": payload.get("form", {}).get(
-                "selected_training_module", ""
+                "module", ""
             ),
             "date_session_1": payload.get("form", {}).get("date"),
         }

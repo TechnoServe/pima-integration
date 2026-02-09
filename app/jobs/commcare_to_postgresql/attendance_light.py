@@ -37,7 +37,7 @@ class AttendanceLightOrchestrator:
             result = self.service.upsert(transformed_data, created_by_id)
 
             logger.info({f"Upserted training session with record ID: '{result.id}'"})
-
+            
             # Step 4: Upsert associated images if any
             image_url = (
                 payload.get("attachments", {})
@@ -52,7 +52,6 @@ class AttendanceLightOrchestrator:
                     image_reference_obj=result,
                     created_by_id=created_by_id,
                 )
-
             return result
 
         except ValueError as e:

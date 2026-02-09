@@ -71,10 +71,14 @@ class ParticipantRegistrationAndUpdateOrchestrator:
             # Step 4: Process farmer deactivation
             self._handle_deactivation(payload, created_by_id)
 
-            # Step 5: Process attendance data
-            self.attendanceorchestrator.process_attendance(
-                payload, Farmer.commcare_case_id, created_by_id
+            # Step 5: Process training session and data
+            self.attendanceorchestrator.process_data(
+                payload, created_by_id
             )
+            
+            # self.attendanceorchestrator.process_attendance(
+            #     payload, Farmer.commcare_case_id, created_by_id
+            # )
 
             return result
 

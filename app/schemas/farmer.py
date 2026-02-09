@@ -17,6 +17,7 @@ class FarmerCreate(BaseModel):
     phone_number: Optional[str] = None
     is_primary_household_member: bool
     status: Literal["Active", "Inactive"]
+    status_notes: Optional[str] = None
     send_to_commcare: bool
     send_to_commcare_status: Literal["Pending", "Processing", "Complete"]
     status_notes: Optional[str] = None

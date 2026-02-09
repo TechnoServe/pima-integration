@@ -1,4 +1,5 @@
 import os
+from datetime import date, datetime, timezone
 from flask import Flask, request, jsonify
 from core import (
     logger,
@@ -107,28 +108,28 @@ def save_payload(source: str):
                     "job_id": request_id,
                 }
             )
+            return (
+                jsonify(
+                    {
+                        "status": "stored",
+                        "job_name": job_name,
+                        "doc_id": doc_id,
+                        "job_id": request_id,
+                    }
+                ),
+                200,
+            )
         else:
             logger.warning(
                 {"message": "Job skipped", "job_name": job_name, "job_id": request_id}
             )
+            return jsonify({"status": "skipped", "job_name": job_name, "job_id": request_id}), 200
 
     except Exception as e:
         logger.error(
             {"message": "Failed to save payload", "job_id": request_id, "error": str(e)}
         )
         return jsonify({"error": str(e)}), 500
-
-    return (
-        jsonify(
-            {
-                "status": "stored",
-                "job_name": job_name,
-                "doc_id": doc_id,
-                "job_id": request_id,
-            }
-        ),
-        200,
-    )
 
 
 # -------------------------------------
@@ -320,9 +321,28 @@ def get_payload(source: str, job_id: str):
 def get_failed_jobs(source: str):
     """Get all failed jobs (summary, without full payloads)"""
     collection = _get_collection(source)
+    
+    start_date = request.args.get("start_date", "2025-01-01")
+    start_date = datetime.strptime(start_date, "%Y-%m-%d")
+    
+    # print(f"Start Date: {str(start_date)}")
+    
+    end_date = request.args.get("end_date")
+    end_date = datetime.strptime(end_date, "%Y-%m-%d") if end_date else datetime.now(timezone.utc)
+    
+    # print(f"End Date: {str(end_date)}")
+        
+    job_name = request.args.get("job_name")
+    job_names = [job_name] if job_name else list(job_mapping.keys())
+    
+    # print(f"Job Names: {str(job_names)}")
+    
     docs = (
         fs_db.collection(collection)
         .where(filter=FieldFilter("status", "==", "failed"))
+        .where(filter=FieldFilter("created_at", ">=", start_date))
+        .where(filter=FieldFilter("created_at", "<=", end_date))
+        .where(filter=FieldFilter("job_name", "in", job_names))
         .get()
     )
 
@@ -367,6 +387,7 @@ def _extract_job_name(source: str, payload: dict):
 
 def _process_and_update_job(doc_id: str, data: dict, collection: str, is_retry=False):
     """Core job processing + Firestore update"""
+    db = SessionLocal()
     try:
         job_name = data.get("job_name")
         job_orchestrator = job_mapping.get(job_name)
@@ -384,7 +405,6 @@ def _process_and_update_job(doc_id: str, data: dict, collection: str, is_retry=F
                 "error": "Job not handled",
             }
 
-        db = SessionLocal()
         result = job_orchestrator(db).process_data(data.get("payload"), SYSTEM_ID)
 
         fields = {
@@ -430,7 +450,8 @@ def _process_and_update_job(doc_id: str, data: dict, collection: str, is_retry=F
             "error": str(e),
             "run_retries": retries,
         }
-
+    finally:
+        db.close()
 
 # -------------------------------------
 # MAIN ENTRY

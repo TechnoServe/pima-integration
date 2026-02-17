@@ -28,7 +28,7 @@ class Observation(
     )
 
     # Columns
-    submission_id = Column(String, nullable=False)
+    submission_id = Column(String, nullable=False, unique=True)
     observation_type = Column(
         Enum("Training", "Demo Plot", name="observation_type_enum", schema=SCHEMA), nullable=False
     )

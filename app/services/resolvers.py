@@ -1,3 +1,4 @@
+import uuid
 from typing import Dict, Type, Any
 from sqlalchemy.orm import Session
 from core import logger
@@ -10,6 +11,13 @@ class ForeignKeyResolver:
         self.db = db
         self.cache: Dict[str, Any] = {}  # Cache model instances
 
+    def _is_valid_uuid(self, value: str) -> bool:
+        try:
+            uuid_obj = uuid.UUID(value)
+            return str(uuid_obj) == value.lower()
+        except (ValueError, AttributeError, TypeError):
+            return False
+    
     def resolve_db_id(
         self, external_id: str, id_column: object, field: str, model: Type
     ) -> Any:
@@ -38,18 +46,19 @@ class ForeignKeyResolver:
                 return existing_record
 
             # Fallback: try direct primary key lookup
-            direct_record = (
-                self.db.query(model)
-                .filter(model.id == external_id, model.is_deleted == False)
-                .first()
-            )
+            if self._is_valid_uuid(external_id):
+                direct_record = (
+                    self.db.query(model)
+                    .filter(model.id == uuid.UUID(external_id), model.is_deleted == False)
+                    .first()
+                )
 
-            if direct_record:
-                self.cache[cache_key] = direct_record
-                logger.info({
-                    "message": f"Resolved {field} via direct ID: external_id={external_id}, internal_id={direct_record.id}"
-                })
-                return direct_record
+                if direct_record:
+                    self.cache[cache_key] = direct_record
+                    logger.info({
+                        "message": f"Resolved {field} via direct ID: external_id={external_id}, internal_id={direct_record.id}"
+                    })
+                    return direct_record
 
             raise ValueError(f"No record found for '{field}' with external ID '{external_id}'")
 

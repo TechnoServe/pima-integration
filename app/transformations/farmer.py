@@ -126,20 +126,13 @@ class FarmerTransformer:
     def _map_farmer_registration_change_ffg(self, payload: Dict) -> Dict[str, Any]:
         """Map data for Farmer - Farmer Registration - EFCF"""
         general_feedback = payload.get("form", {}).get("general_feedback")
+        chng_ffg_dict: dict = payload.get("form", {}).get("existing_farmer_change_in_ffg", {})
         primary_household_member = (
             payload.get("form", {}).get("Primary_Household_Member", "") == "Yes"
         )
         return {
             "tns_id": payload.get("form", {}).get("Farmer_Id"),
-            "commcare_case_id": payload.get("form", {})
-            .get("existing_farmer_change_in_ffg", {})
-            .get("old_farmer_id"),
-            "first_name": payload.get("form", {}).get("First_Name"),
-            "middle_name": payload.get("form", {}).get("Middle_Name", ""),
-            "last_name": payload.get("form", {}).get("Last_Name"),
-            "other_id": self._get_other_id_number(payload),
-            "gender": payload.get("form", {}).get("Gender"),
-            "age": int(payload.get("form", {}).get("Age")),
+            "commcare_case_id": chng_ffg_dict.get("old_farmer_id"),
             "is_primary_household_member": primary_household_member,
             "status": "Active",
             "status_notes": (

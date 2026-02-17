@@ -72,13 +72,12 @@ class ParticipantRegistrationAndUpdateOrchestrator:
             self._handle_deactivation(payload, created_by_id)
 
             # Step 5: Process training session and data
-            self.attendanceorchestrator.process_data(
-                payload, created_by_id
-            )
-            
-            # self.attendanceorchestrator.process_attendance(
-            #     payload, Farmer.commcare_case_id, created_by_id
-            # )
+            if payload.get("form", {}).get("@name") != "Edit Farmer Details":
+                self.attendanceorchestrator.process_data(
+                    payload, created_by_id
+                )
+            else:
+                logger.info({"message": "Skipping training session and attendance upsert"})
 
             return result
 

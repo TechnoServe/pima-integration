@@ -1,4 +1,4 @@
-import os
+import os, itertools, concurrent.futures
 from datetime import date, datetime, timezone
 from flask import Flask, request, jsonify
 from core import (
@@ -351,13 +351,74 @@ def get_failed_jobs(source: str):
             "job_id": d.to_dict().get("job_id"),
             "job_name": d.to_dict().get("job_name"),
             "run_retries": d.to_dict().get("run_retries"),
+            "created_at": d.to_dict().get("created_at"),
             "last_retried_at": d.to_dict().get("last_retried_at"),
             "error": d.to_dict().get("error"),
+            "payload": d.to_dict().get("payload"),
         }
         for d in docs
     ]
     return jsonify({"failed_count": len(jobs), "jobs": jobs}), 200
 
+# -------------------------------------
+# UPDATE PAYLOAD DETAILS
+# -------------------------------------
+@app.route("/update-payloads/<source>", methods=["POST"])
+def update_payloads(source: str):
+    """Bulk update the payload details e.g. Status, Number of Retries e.t.c"""
+
+    collection = _get_collection(source)
+    data: dict = request.get_json(silent=True) or {}
+    update_status = data.get("status", "new")
+    update_run_retries = data.get("run_retries", 0)
+    job_ids = data.get("job_ids")
+
+    def chunked(iterable, size=30):
+        it = iter(iterable)
+        while True:
+            chunk = list(itertools.islice(it, size))
+            if not chunk:
+                break
+            yield chunk
+    
+    def fetch_chunk(id_chunk):
+        return list(
+            fs_db.collection(collection).where(filter=FieldFilter("job_id", "in", id_chunk)).stream()
+        )
+
+    try:
+        results = []
+        with concurrent.futures.ThreadPoolExecutor() as executor:
+            futures = [
+                executor.submit(
+                    fetch_chunk,
+                    chunk
+                )
+                for chunk in chunked(job_ids, 30)
+            ]
+            for f in futures:
+                results.extend(f.result())
+
+        batch_size = 500
+        for i in range(0, len(results), batch_size):
+            batch = fs_db.batch()
+            chunk = results[i:i+batch_size]
+            for doc in chunk:
+                logger.info({
+                    "message": f"Parsing document {str(doc.id)}"
+                })
+                doc_ref = fs_db.collection(collection).document(doc.id)
+                update_data = {
+                    "status": update_status,
+                    "updated_at": str(datetime.now(timezone.utc)),
+                    "run_retries": int(update_run_retries)
+                }
+                batch.update(doc_ref, update_data)
+            batch.commit()
+        
+        return jsonify({"message": "Update completed"}), 200
+    except Exception as e:
+        return jsonify({"error": "Failed to update records", "details": str(e)}), 500
 
 # -------------------------------------
 # INTERNAL HELPERS

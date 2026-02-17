@@ -26,7 +26,7 @@ class ObservationResult(
     )
 
     # Columns
-    submission_id = Column(String, nullable=False)
+    submission_id = Column(String, nullable=False, unique=True)
     observation_id = Column(
         UUID(as_uuid=True), ForeignKey(f"{SCHEMA}.observations.id"), nullable=False
     )

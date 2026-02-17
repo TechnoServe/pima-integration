@@ -74,6 +74,17 @@ DPO_MAPPINGS = {
         "2": "Medium shade, 20 to 40%",
         "3": "Heavy shade, over 40%",
     },
+
+    "shade_trees_planted": {
+        "1": "Yes. 2 shade trees planted",
+        "0": "No. Shade trees have not been planted yet"
+    },
+
+    "banana_intercrop": {
+        "1": "Yes, there is a line of bananas",
+        "0": "No line of bananas"
+    },
+
     # 6. Mulching
     "mulch_under_the_canopy": {
         "No": "No",

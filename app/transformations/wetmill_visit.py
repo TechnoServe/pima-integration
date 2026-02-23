@@ -1,6 +1,6 @@
 from core import logger
 from schemas import WetmillVisitCreate
-from models import Wetmill
+from models import Wetmill, User
 from services import ForeignKeyResolver
 import datetime
 from pydantic import ValidationError
@@ -26,11 +26,17 @@ class WetmillVisitTransformer:
                 "Wetmill",
                 Wetmill,
             )
+            visiting_staff = self.resolver.resolve_db_id(
+                form.get("visiting_staff_sf_id", wetmill.user_id),
+                User.sf_id,
+                "Visiting Staff",
+                User,
+            ).id
 
             session_data = self._map_wetmill_visit_data(payload=payload)
 
             return WetmillVisitCreate(
-                wetmill_id=wetmill.id, user_id=wetmill.user_id, **session_data
+                wetmill_id=wetmill.id, visiting_staff=visiting_staff, **session_data
             )
 
         except ValidationError as e:

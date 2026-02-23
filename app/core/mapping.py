@@ -263,6 +263,8 @@ FV_STUMPING_PROGRAM_FILTER = {
     "f079b0daae1d4d34a89e331dc5a72fbd": "2024",  # CREW 2025
     "521097abbcfd4fa79668cb6ca3dca28a": "2025",  # Regrow 2024
     "0c9b5791828b4baea6c1eaa4d6979c5a": "2025",  # CREW 2024
+    "3e36504f1b964ed4b1699bc14fd8c249": "2026",  # Regrow 2026
+    "ec6aed8f4ee7455abc06e951877c8b4a": "2026",  # CREW 2026
 }
 
 FV_BP_MAPPINGS = {

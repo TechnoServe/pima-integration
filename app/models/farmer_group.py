@@ -25,6 +25,8 @@ class FarmerGroup(
         Index("idx_farmer_groups_sf_id", "sf_id"),
         Index("idx_farmer_groups_created_by_id", "created_by_id"),
         Index("idx_farmer_groups_last_updated_by_id", "last_updated_by_id"),
+        Index("idx_farmer_groups_focal_farmer_id", "focal_farmer_id"),
+        Index("idx_farmer_groups_assistant_focal_farmer_id", "assistant_focal_farmer_id"),
         {"schema": SCHEMA},
     )
 
@@ -37,6 +39,16 @@ class FarmerGroup(
     )
     tns_id = Column(String, unique=True, nullable=False)
     commcare_case_id = Column(String, unique=True, nullable=False)
+    focal_farmer_id = Column(
+        UUID(as_uuid=True), 
+        ForeignKey(f"{SCHEMA}.farmers.id", use_alter=True, name="fk_farmer_groups_focal_farmer_id"), 
+        nullable=True
+    )
+    assistant_focal_farmer_id = Column(
+        UUID(as_uuid=True), 
+        ForeignKey(f"{SCHEMA}.farmers.id", use_alter=True, name="fk_farmer_groups_assistant_focal_farmer_id"),
+        nullable=True
+    )
     ffg_name = Column(String, nullable=False)
     send_to_commcare = Column(
         Boolean, nullable=False, default=False, server_default=text("false")
@@ -64,13 +76,19 @@ class FarmerGroup(
     )
     fv_aa_sampling_round = Column(Integer, nullable=True)
 
-    # Relationships
+    # Relationshipss
     project = relationship("Project", back_populates="farmer_groups")
     responsible_staff = relationship(
         "User", back_populates="farmer_groups", foreign_keys=[responsible_staff_id]
     )
     location = relationship("Location", back_populates="farmer_groups")
-    farmers = relationship("Farmer", back_populates="farmer_group")
+    farmers = relationship("Farmer", back_populates="farmer_group", foreign_keys="[Farmer.farmer_group_id]")
     households = relationship("Household", back_populates="farmer_group")
     training_sessions = relationship("TrainingSession", back_populates="farmer_group")
     observations = relationship("Observation", back_populates="farmer_group")
+    focal_farmer = relationship(
+        "Farmer", back_populates="ff_farmer_group", foreign_keys=[focal_farmer_id]
+    )
+    assistant_focal_farmer = relationship(
+        "Farmer", back_populates="aff_farmer_group", foreign_keys=[assistant_focal_farmer_id]
+    )

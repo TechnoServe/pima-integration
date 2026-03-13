@@ -15,7 +15,7 @@ class WetmillVisit(Base, SoftDeleteMixin, TimestampMixin, UUIDMixin, AuditMixin)
     __tablename__ = "wetmill_visits"
     __table_args__ = (
         Index("idx_wetmill_visits_wetmill_id", "wetmill_id"),
-        Index("idx_wetmill_visits_user_id", "user_id"),
+        Index("idx_wetmill_visits_user_id", "visiting_staff_id"),
         Index("idx_wetmill_visits_submission_id", "submission_id"),
         Index("idx_wetmill_visits_created_by_id", "created_by_id"),
         Index("idx_wetmill_visits_last_updated_by_id", "last_updated_by_id"),

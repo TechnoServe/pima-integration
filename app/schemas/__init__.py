@@ -17,5 +17,6 @@ from .wetmill_visit import WetmillVisitCreate
 from .wv_survey_response import WVSurveyResponseCreate
 from .wv_survey_question_response import WVSurveyQuestionResponseCreate
 from .wetmill import WetmillCreate
+from .farmer_group import FarmerGroupUpdate
 
 print("Imported all Pydantic schemas Successfully!")

@@ -17,5 +17,6 @@ from .wetmill_visit import WetmillVisitTransformer
 from .wv_survey_response import WVSurveyResponseTransformer
 from .wv_survey_question_response import WVSurveyQuestionResponseTransformer
 from .wetmill import WetmillTransformer
+from .farmer_group import FarmerGroupTransformer
 
 print("Imported all transformation classes successfully!")

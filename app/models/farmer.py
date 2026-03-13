@@ -82,7 +82,13 @@ class Farmer(Base, AuditMixin, SFIDMixin, SoftDeleteMixin, TimestampMixin, UUIDM
     status_notes = Column(String, nullable=True)
 
     # Relationships
-    farmer_group = relationship("FarmerGroup", back_populates="farmers")
+    farmer_group = relationship("FarmerGroup", back_populates="farmers", foreign_keys=[farmer_group_id])
+    ff_farmer_group = relationship(
+        "FarmerGroup", back_populates="focal_farmer", foreign_keys="FarmerGroup.focal_farmer_id"
+    )
+    aff_farmer_group = relationship(
+        "FarmerGroup", back_populates="assistant_focal_farmer", foreign_keys="FarmerGroup.assistant_focal_farmer_id"
+    )
     household = relationship("Household", back_populates="farmers")
     attendances = relationship("Attendance", back_populates="farmer")
     farm_visits_primary_farmer = relationship(

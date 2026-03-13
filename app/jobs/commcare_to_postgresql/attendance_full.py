@@ -1,9 +1,9 @@
 """Holds the class to orchestrate attendance full forms from CommCare to PostgreSQL"""
 
 from sqlalchemy.orm import Session
-from services import ForeignKeyResolver, AttendanceService
-from transformations import AttendanceTransformer
-from models import Farmer
+from services import ForeignKeyResolver, AttendanceService, FarmerGroupService
+from transformations import AttendanceTransformer, FarmerGroupTransformer
+from models import Farmer, FarmerGroup
 from core import logger
 from jobs.commcare_to_postgresql.attendance_light import AttendanceLightOrchestrator
 from dataclasses import dataclass
@@ -22,6 +22,8 @@ class AttendanceFullOrchestrator:
         self.resolver = ForeignKeyResolver(db)
         self.transformer = AttendanceTransformer(self.resolver)
         self.service = AttendanceService(db)
+        self.farmergrouptransformer = FarmerGroupTransformer(self.resolver)
+        self.farmergroupservice = FarmerGroupService(db)
         self.trainingsessionorchestrator = AttendanceLightOrchestrator(db)
 
     def process_data(self, raw_payload: dict, created_by_id: str):
@@ -30,7 +32,11 @@ class AttendanceFullOrchestrator:
         self.trainingsessionorchestrator.process_training_session(
             raw_payload=raw_payload, created_by_id=created_by_id
         )
-        # 2. Process attendance data
+        # 2. Process training group (FF & AFF)
+        self.process_farmer_group(
+            raw_payload=raw_payload, created_by_id=created_by_id
+        )
+        # 3. Process attendance data
         return self.process_attendance(
             payload=raw_payload,
             id_column=Farmer.commcare_case_id,
@@ -75,4 +81,29 @@ class AttendanceFullOrchestrator:
         except Exception as e:
             self.db.rollback()
             logger.error({"message": f"Unexpected error: {str(e)}"})
+            raise
+        
+    def process_farmer_group(self, raw_payload: dict, created_by_id: str) -> FarmerGroup:
+        try:
+            # Step 1: Parse raw JSON into Pydantic schema
+            payload = raw_payload
+
+            # Step 2: Transform payload (includes foreign key resolution)
+            transformed_data = self.farmergrouptransformer.transform(payload)
+
+            # Step 3: Upsert to database
+            result = self.farmergroupservice.update(transformed_data, created_by_id)
+
+            logger.info({f"Upserted farmer group with record ID: '{result.id}'"})
+
+            return result
+
+        except ValueError as e:
+            self.db.rollback()
+            logger.error({"message": f"Value error in farmer group processing: {str(e)}"})
+            raise
+
+        except Exception as e:
+            logger.error({f"Error processing farmer group: {str(e)}"})
+            self.db.rollback()
             raise

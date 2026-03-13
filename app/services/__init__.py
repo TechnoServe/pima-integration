@@ -19,5 +19,6 @@ from .wetmill_visit import WetmillVisitService
 from .wv_survey_response import WVSurveyResponseService
 from .wv_survey_question_response import WVSurveyQuestionResponseService
 from .wetmill import WetmillService
+from .farmer_group import FarmerGroupService
 
 print("Imported all services successfully!")

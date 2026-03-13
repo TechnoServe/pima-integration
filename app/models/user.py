@@ -110,5 +110,5 @@ class User(Base, SFIDMixin, SoftDeleteMixin, TimestampMixin, UUIDMixin):
     )
 
     wetmill_visits = relationship(
-        "WetmillVisit", back_populates="submitter", foreign_keys="WetmillVisit.user_id"
+        "WetmillVisit", back_populates="submitter", foreign_keys="WetmillVisit.visiting_staff_id"
     )

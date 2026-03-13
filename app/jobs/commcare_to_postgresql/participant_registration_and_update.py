@@ -1,7 +1,7 @@
 from sqlalchemy.orm import Session
-from services import ForeignKeyResolver, FarmerService, HouseholdService
-from transformations import FarmerTransformer, HouseholdTransformer
-from models import Farmer, Household
+from services import ForeignKeyResolver, FarmerService, HouseholdService, FarmerGroupService
+from transformations import FarmerTransformer, HouseholdTransformer, FarmerGroupTransformer
+from models import Farmer, Household, FarmerGroup
 from core import logger
 from jobs.commcare_to_postgresql import AttendanceFullOrchestrator
 
@@ -12,6 +12,8 @@ class ParticipantRegistrationAndUpdateOrchestrator:
     def __init__(self, db: Session):
         self.db = db
         self.resolver = ForeignKeyResolver(db)
+        self.farmergrouptransformer = FarmerGroupTransformer(self.resolver)
+        self.farmergroupservice = FarmerGroupService(db)
         self.farmertransformer = FarmerTransformer(self.resolver)
         self.farmerservice = FarmerService(db)
         self.householdtransformer = HouseholdTransformer(self.resolver)
@@ -26,6 +28,31 @@ class ParticipantRegistrationAndUpdateOrchestrator:
         # 2. Process farmer data
         return self.process_farmer(raw_payload, created_by_id)
 
+    def process_farmer_group(self, raw_payload: dict, created_by_id: str) -> FarmerGroup:
+        try:
+            # Step 1: Parse raw JSON into Pydantic schema
+            payload = raw_payload
+
+            # Step 2: Transform payload (includes foreign key resolution)
+            transformed_data = self.farmergrouptransformer.transform(payload)
+
+            # Step 3: Upsert to database
+            result = self.farmergroupservice.update(transformed_data, created_by_id)
+
+            logger.info({f"Upserted farmer group with record ID: '{result.id}'"})
+
+            return result
+
+        except ValueError as e:
+            self.db.rollback()
+            logger.error({"message": f"Value error in farmer group processing: {str(e)}"})
+            raise
+
+        except Exception as e:
+            logger.error({f"Error processing farmer group: {str(e)}"})
+            self.db.rollback()
+            raise
+    
     def process_household(self, raw_payload: dict, created_by_id: str) -> Household:
         """Complete workflow for processing household payload"""
 
@@ -78,7 +105,13 @@ class ParticipantRegistrationAndUpdateOrchestrator:
                 )
             else:
                 logger.info({"message": "Skipping training session and attendance upsert"})
-
+            
+            if payload.get("form", {}).get("@name") != "Edit Farmer Details":
+                self.process_farmer_group(raw_payload, created_by_id)
+            
+            else:
+                logger.info({"message": "Skipping FF and AFF upsert"})
+            
             return result
 
         except ValueError as e:

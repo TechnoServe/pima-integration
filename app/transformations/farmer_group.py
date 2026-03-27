@@ -1,6 +1,6 @@
 """Farmer Group Transformations"""
 
-from models import Farmer, FarmerGroup
+from models import Farmer, FarmerGroup, TrainingSession
 from schemas import FarmerGroupUpdate
 from pydantic import ValidationError
 from services import ForeignKeyResolver
@@ -16,8 +16,24 @@ class FarmerGroupTransformer:
         try:
             
             data = self._map_form_type(payload)
+            
+            # Quick fix for handling missing farmer group ids (FTs with old versions of the form that didn't capture farmer group id)
+            training_session: TrainingSession = self.resolver.resolve_db_id(
+                data.get("training_session_case_id"),
+                TrainingSession.commcare_case_id,
+                "Training Session",
+                TrainingSession,
+            )
+            
+            farmer_group: FarmerGroup = self.resolver.resolve_db_id(
+                str(training_session.farmer_group_id),
+                FarmerGroup.commcare_case_id,
+                "Farmer Group",
+                FarmerGroup,
+            ) 
+            
             results = {
-                "commcare_case_id": data.get("commcare_case_id"),
+                "commcare_case_id": data.get("commcare_case_id") or str(farmer_group.commcare_case_id),
             }
             
             focal_farmer_id = self.resolver.resolve_db_id(
@@ -49,7 +65,8 @@ class FarmerGroupTransformer:
             return {
                 "focal_farmer_case_id": payload.get("form", {}).get("updated_focal_farmer_case_id"),
                 "assistant_focal_farmer_case_id": payload.get("form", {}).get("updated_assistant_focal_farmer_case_id"),
-                "commcare_case_id": payload.get("form", {}).get("ffg_case_id")
+                "commcare_case_id": payload.get("form", {}).get("ffg_case_id"),
+                "training_session_case_id": payload.get("form", {}).get("training_session", ""),
             }
         elif form_type == "Participant":
             new_farmer_yn = payload.get("form", {}).get("create_case", "") == "Yes"
@@ -59,5 +76,6 @@ class FarmerGroupTransformer:
             return {
                 "focal_farmer_case_id": farmer_commcare_case_id if is_focal_farmer else None,
                 "assistant_focal_farmer_case_id": farmer_commcare_case_id if is_assistant_focal_farmer else None,
-                "commcare_case_id": payload.get("form", {}).get("case", {}).get("@case_id", "")
+                "commcare_case_id": payload.get("form", {}).get("case", {}).get("@case_id", ""),
+                "training_session_case_id": payload.get("form", {}).get("module", ""),
             }

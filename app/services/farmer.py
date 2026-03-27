@@ -82,6 +82,7 @@ class FarmerService:
             farmer.status = "Inactive"
             farmer.status_notes = "Deactivated. Replaced"
             farmer.send_to_commcare = True
+            farmer.send_to_commcare_status = 'Pending'
             farmer.last_updated_by_id = updated_by_id
             self.db.commit()
             self.db.refresh(farmer)

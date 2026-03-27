@@ -30,6 +30,11 @@ class WetmillTransformer:
             ).staff_id
 
             session_data = self._map_wetmill_data(payload=payload)
+            
+            print(f"""
+                  
+                   Transformed Wetmill Data:
+                   {session_data}""")
 
             return WetmillCreate(
                 user_id=user_id, **session_data
@@ -101,7 +106,7 @@ class WetmillTransformer:
             "office_entrance_picture": payload.get("attachments", {}).get(entrance_picture, {}).get("url", "") if entrance_picture else None,
             "office_gps": from_shape(point, srid=4326) if point else None,
             "vertical_integration": vertical_integration
-    }
+        }
 
     def _extract_location_string(self, location_string):
         """

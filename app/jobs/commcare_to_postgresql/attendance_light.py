@@ -65,7 +65,7 @@ class AttendanceLightOrchestrator:
             logger.error({f"Error processing training session: {str(e)}"})
             self.db.rollback()
             raise
-
+            
     def process_image(
         self,
         image_url: str,

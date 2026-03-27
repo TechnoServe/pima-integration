@@ -21,10 +21,12 @@ class TrainingSessionCreate(BaseModel):
     male_attendees_session_1: Optional[int] = None
     female_attendees_session_1: Optional[int] = None
     total_attendees_session_1: Optional[int] = None
+    households_attending_session_1: Optional[int] = None
 
     male_attendees_session_2: Optional[int] = None
     female_attendees_session_2: Optional[int] = None
     total_attendees_session_2: Optional[int] = None
+    households_attending_session_2: Optional[int] = None
 
     male_attendees_agg: Optional[int] = None
     female_attendees_agg: Optional[int] = None

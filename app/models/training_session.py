@@ -53,10 +53,12 @@ class TrainingSession(
     male_attendees_session_1 = Column(Integer, nullable=True)
     female_attendees_session_1 = Column(Integer, nullable=True)
     total_attendees_session_1 = Column(Integer, nullable=True)
+    households_attending_session_1 = Column(Integer, nullable=True)
 
     male_attendees_session_2 = Column(Integer, nullable=True)
     female_attendees_session_2 = Column(Integer, nullable=True)
     total_attendees_session_2 = Column(Integer, nullable=True)
+    households_attending_session_2 = Column(Integer, nullable=True)
 
     male_attendees_agg = Column(Integer, nullable=True)
     female_attendees_agg = Column(Integer, nullable=True)

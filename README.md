@@ -1,4 +1,4 @@
-# Pima Integration
+# PIMA Integration
 
 A Flask-based ETL service that receives webhooks from **CommCare**, stores payloads in **Firestore**, and processes them into a **PostgreSQL** database. Deployed on Google Cloud Run.
 

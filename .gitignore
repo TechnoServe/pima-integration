@@ -1,5 +1,6 @@
 .venv
 .env
+.sfdx
 **__pycache__
 *env.py
 alembic.ini

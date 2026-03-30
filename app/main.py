@@ -1,4 +1,5 @@
 import os, itertools, concurrent.futures
+from concurrent.futures import ThreadPoolExecutor
 from datetime import date, datetime, timezone
 from flask import Flask, request, jsonify
 from core import (
@@ -131,6 +132,60 @@ def save_payload(source: str):
         )
         return jsonify({"error": str(e)}), 500
 
+# -------------------------------------
+# SAVE PAYLOAD (BULK)
+# -------------------------------------
+@app.route("/save-payloads/<source>", methods=["POST"])
+def save_payloads(source: str):
+    """Bulk save endpoint to receive JSON with multiple payloads"""
+    
+    payloads = request.get_json(silent=True) or []
+    if not payloads:
+        return jsonify({"error": "No payloads provided"}), 400
+    collection = _get_collection(source)
+    
+    results = []
+    
+    def process_payload(payload):
+        job_name = _extract_job_name(source, payload)
+        job_id = payload.get("id")
+        
+        if job_name in MIGRATED_FORM_TYPES:
+            existing = (
+                fs_db.collection(collection)
+                .where(filter=FieldFilter("job_id", "==", job_id))
+                .limit(1)
+                .get()
+            )
+            if existing:
+                doc_id = existing[0].id
+                update_firestore_status(
+                    doc_id=doc_id,
+                    status="new",
+                    collection=collection,
+                    fields={
+                        "payload": payload,
+                        "job_name": job_name,
+                        "run_retries": 0,
+                        "updated_at": firestore.SERVER_TIMESTAMP,
+                    },
+                )
+            else:
+                doc_id = save_to_firestore(payload, job_name, "new", collection)
+            logger.info({"message": "Payload stored", "job_name": job_name, "doc_id": doc_id, "job_id": job_id})
+            return {"status": "stored", "job_name": job_name, "doc_id": doc_id, "job_id": job_id}
+        else:
+            logger.warning({"message": "Job skipped", "job_name": job_name, "job_id": job_id})
+            return {"status": "skipped", "job_name": job_name, "job_id": job_id}
+    
+    # Use ThreadPoolExecutor for concurrent processing of payloads. Iterate through payloads in batches of 30 to avoid overwhelming Firestore with too many concurrent writes.
+    with ThreadPoolExecutor(max_workers=30) as executor:
+        futures = [executor.submit(process_payload, payload) for payload in payloads]
+        for future in concurrent.futures.as_completed(futures):
+            results.append(future.result())
+                
+    return jsonify({"message": "Bulk save completed", "Payload Count": len(results), "results": results}), 200
+        
 
 # -------------------------------------
 # PROCESS JOBS (NEW)

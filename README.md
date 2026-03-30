@@ -150,13 +150,13 @@ Content-Type: application/json
 
 **Build the container image:**
 ```bash
-gcloud builds submit --tag gcr.io/pima-gcp/cc-sf-integration-app
+gcloud builds submit --tag gcr.io/pima-gcp/pima-integration-app
 ```
 
 **Deploy:**
 ```bash
 gcloud run deploy pima-integration-app \
-  --image gcr.io/pima-gcp/pima-integration \
+  --image gcr.io/pima-gcp/pima-integration-app \
   --platform managed \
   --allow-unauthenticated \
   --region europe-west1 \

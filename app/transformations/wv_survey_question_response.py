@@ -73,10 +73,10 @@ class WVSurveyQuestionResponseTransformer:
             "value_gps": from_shape(field_value, srid=4326) if field_type == "gps" else None,
         }
     
-    def _infer_field_type(self, value):
+    def _infer_field_type(self, value, question_name):
         """
         Infer the data type of the answer and return (field_type, parsed_value).
-        - Booleans: 'TRUE', 'FALSE', '1', '0'
+        - Booleans: 'TRUE', 'FALSE', '1', '0', except for cases where question_name contains 'total' or 'count'
         - Dates: ISO format 'YYYY-MM-DD'
         - Numbers: integers or floats (e.g., '50', '50.0')
         - Fallback to text
@@ -87,7 +87,7 @@ class WVSurveyQuestionResponseTransformer:
             # Detect booleans
             if val.upper() in ("TRUE", "FALSE"):
                 return "boolean", (val.upper() == "TRUE")
-            if val in ("1", "0"):
+            if val in ("1", "0") and not any(keyword in question_name.lower() for keyword in ("total", "count")):
                 return "boolean", (val == "1")
             # Detect dates
             try:

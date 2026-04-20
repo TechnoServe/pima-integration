@@ -583,7 +583,7 @@ MANAGER_ROLE_MAP = {
     "Wet Mill Registration - BU": {"1": "General manager", "2": "Site/factory manager"},
     "Wet Mill Registration - KE": {
         "1": "Cooperative board of management",
-        "2": "CEO/Secretary Manger",
+        "2": "CEO/Secretary Manager",
         "3": "Factory/Wet Mill Manager",
     },
 }

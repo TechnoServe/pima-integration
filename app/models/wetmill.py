@@ -1,4 +1,4 @@
-from sqlalchemy import Column, String, ForeignKey, Integer, Index, Text, Date
+from sqlalchemy import Column, String, ForeignKey, Integer, Index, Text, text, Date, Boolean, Enum
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 from .base import Base
@@ -45,6 +45,21 @@ class Wetmill(Base, SoftDeleteMixin, TimestampMixin, UUIDMixin, AuditMixin):
     registration_date = Column(Date, nullable=True)
     office_entrance_picture = Column(String, nullable=True)
     office_gps = Column(Geometry("POINT", srid=4326, spatial_index=False), nullable=True)
+    send_to_commcare = Column(
+        Boolean, default=False, server_default=text("false"), nullable=False
+    )
+    send_to_commcare_status = Column(
+        Enum(
+            "Pending",
+            "Processing",
+            "Complete",
+            name="wetmill_send_to_commcare_status_enum",
+            schema=SCHEMA
+        ),
+        nullable=False,
+        default="Pending",
+        server_default="Pending",
+    )
 
     # Relationship to visits
     visits = relationship(

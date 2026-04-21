@@ -45,6 +45,8 @@ class Wetmill(Base, SoftDeleteMixin, TimestampMixin, UUIDMixin, AuditMixin):
     registration_date = Column(Date, nullable=True)
     office_entrance_picture = Column(String, nullable=True)
     office_gps = Column(Geometry("POINT", srid=4326, spatial_index=False), nullable=True)
+    mill_external_id = Column(String, nullable=True)
+    status = Column(Enum("Active", "Inactive", name="wetmill_status_enum", schema=SCHEMA), nullable=True, default="Active", server_default="Active")
     send_to_commcare = Column(
         Boolean, default=False, server_default=text("false"), nullable=False
     )

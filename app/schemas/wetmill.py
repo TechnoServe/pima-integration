@@ -26,3 +26,6 @@ class WetmillCreate(BaseModel):
     registration_date: date
     office_entrance_picture: Optional[str]
     office_gps: Optional[object]
+    mill_external_id: Optional[str]
+    vertical_integration: Optional[str]
+    status: Optional[str] = "Active"

@@ -105,7 +105,8 @@ class WetmillTransformer:
             "registration_date": form.get("registration_date"),
             "office_entrance_picture": payload.get("attachments", {}).get(entrance_picture, {}).get("url", "") if entrance_picture else None,
             "office_gps": from_shape(point, srid=4326) if point else None,
-            "vertical_integration": vertical_integration
+            "vertical_integration": vertical_integration,
+            "mill_external_id": wetmill_details.get("mill_id") or None,
         }
 
     def _extract_location_string(self, location_string):

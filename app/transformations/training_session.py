@@ -90,7 +90,7 @@ class TrainingSessionTransformer:
             ),
             "households_attending_session_1": payload.get("form", {})            
             .get("Current_session_participants", {})
-            .get("households_attendance"),
+            .get("household_attendance"),
         }
 
     def _map_aa_light_session(self, payload: Dict) -> Dict[str, Any]:
@@ -122,7 +122,7 @@ class TrainingSessionTransformer:
             ),
             "households_attending_session_2": payload.get("form", {})            
             .get("Current_session_participants", {})
-            .get("households_attendance"),
+            .get("household_attendance"),
         }
 
     def _map_ft_full_session(self, payload: Dict) -> Dict[str, Any]:

@@ -166,7 +166,8 @@ class WetmillVisitOrchestrator:
                     if section.endswith("_label") or section.startswith("survey_") or section == "general_feedback":
                         continue
                     submission_id = f"SQR-{payload.get("id")}-{survey_name}-{section}"
-                    print("Passing through this. . .")
+                    # print("Passing through this. . .")
+                    # print(f"Section: {section}, Answer: {sec_content}, Submission ID: {submission_id}")
                     self.process_survey_question_response(
                         payload=payload,
                         survey_type=survey_name,

@@ -59,7 +59,7 @@ class WVSurveyQuestionResponseTransformer:
         submission_id,
     ) -> Dict[str, Any]:
         """Map WV survey question response data"""
-        field_type, field_value = self._infer_field_type(answer)
+        field_type, field_value = self._infer_field_type(answer, question_name)
 
         return {
             "submission_id": submission_id,

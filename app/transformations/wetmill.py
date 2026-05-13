@@ -31,10 +31,10 @@ class WetmillTransformer:
 
             session_data = self._map_wetmill_data(payload=payload)
             
-            print(f"""
+            # print(f"""
                   
-                   Transformed Wetmill Data:
-                   {session_data}""")
+            #        Transformed Wetmill Data:
+            #        {session_data}""")
 
             return WetmillCreate(
                 user_id=user_id, **session_data

@@ -66,11 +66,26 @@ class FVBestPracticeAnswerTransformer:
         answer_boolean: bool | None = None
 
         if bp_question in FV_BP_MAPPINGS and bp_question in FV_BP_VISIT_TYPE_FILTER:
-            answer = (
-                FV_BP_MAPPINGS.get(bp_question, {})
-                .get(visit_type, {})
-                .get(bp_answer, "")
-            )
+            if bp_question == "do_you_have_compost_manure" and visit_type == "Farm Visit Full - ZM" and multiselect == True:
+                answer = (
+                    FV_BP_MAPPINGS.get(bp_question, {})
+                    .get(visit_type, {})
+                    .get("new", {})
+                    .get(bp_answer, "")
+                )
+            if bp_question == "do_you_have_compost_manure" and visit_type == "Farm Visit Full - ZM" and multiselect == False:
+                answer = (
+                    FV_BP_MAPPINGS.get(bp_question, {})
+                    .get(visit_type, {})
+                    .get("old", {})
+                    .get(bp_answer, "")
+                )
+            else:
+                answer = (
+                    FV_BP_MAPPINGS.get(bp_question, {})
+                    .get(visit_type, {})
+                    .get(bp_answer, "")
+                )
             answer = f"Other: {other}" if answer == "Other" else answer
 
         # Special stumping year case
@@ -85,7 +100,7 @@ class FVBestPracticeAnswerTransformer:
         ):
             answer = FV_BP_MAPPINGS.get(bp_question, {}).get(bp_answer, "")
             answer = f"Other: {other}" if answer == "Other" else answer
-            if answer in ["Yes", "No"]:
+            if answer in ["Yes", "No", "yes", "no"]:
                 answer_boolean = answer == "Yes"
                 answer = None
 

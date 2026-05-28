@@ -44,7 +44,7 @@ class Wetmill(Base, SoftDeleteMixin, TimestampMixin, UUIDMixin, AuditMixin):
     tor_page_picture = Column(String, nullable=True)
     registration_date = Column(Date, nullable=True)
     office_entrance_picture = Column(String, nullable=True)
-    office_gps = Column(Geometry("POINT", srid=4326, spatial_index=False), nullable=True)
+    office_gps = Column(Geometry("POINTZ", srid=4326, spatial_index=False), nullable=True)
     mill_external_id = Column(String, nullable=True)
     status = Column(Enum("Active", "Inactive", name="wetmill_status_enum", schema=SCHEMA), nullable=True, default="Active", server_default="Active")
     vertical_integration = Column(Enum("Yes", "No", name="wetmill_vertical_integration_enum", schema=SCHEMA), nullable=True)

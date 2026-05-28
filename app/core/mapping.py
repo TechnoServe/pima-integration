@@ -160,7 +160,15 @@ FV_BP_MULTISELECT = [
     "which_pests_cause_you_problems",
     "do_you_spray_any_of_the_following_on_your_farm_for_leaf_miner_or_rust",
     "seedling_planting_and_survival-second_questions-species_distributed",
+    # "do_you_have_compost_manure"
 ]
+
+APP_UPDATE_ZM = {
+    "8e8e5df7294548e6a4b55ca1a3a05f61": 128, # 2024C
+    "2b0b8dc3eff145889eaa3d085bfaadaf": 296, # 2021C
+    "c14d231df6e142deb9bdd44319287437": 257, # 2019C
+    "b75286e874c74eb09b8da436709d7f3c": 493 # 2018C
+}
 
 FV_QUESTIONS_IGNORE_LIST = [
     "#type",
@@ -243,11 +251,14 @@ FV_QUESTIONS_MAPPINGS = {
 
 YN = {
     "1": True,
-    "0": False
+    "0": False,
+    "yes": True,
+    "no": False
 }
 
 YN_QUESTIONS = [
-    "attended_training"
+    "attended_training",
+    "farmer_consent"
 ]
 
 FV_BP_VISIT_TYPE_FILTER = [
@@ -255,6 +266,7 @@ FV_BP_VISIT_TYPE_FILTER = [
     "methods_of_controlling_coffee_berry_borer",
     "do_you_have_a_record_book",
     "are_there_records_on_the_record_book",
+    "do_you_have_compost_manure",
 ]
 
 # Keep updating every year for new cohorts. Until we find out a way to globalize the entries
@@ -487,8 +499,30 @@ FV_BP_MAPPINGS = {
     },
     # 9. Compost
     "do_you_have_compost_manure": {
-        "0": "NO",
-        "1": "YES, compost or manure heap seen",
+        "Farm Visit Full - ZM": {
+            'old': {
+                "0": "NO",
+                "1": "YES, compost or manure heap seen",
+            },
+            'new': {
+                '1' : 'YES a compost heap',
+                '2' : 'YES a compost pit',
+                '3' : 'YES a manure heap', 
+                '0' : 'NO compost or manure'
+            }
+        },
+        "Farm Visit Full - KE": {
+            "0": "NO",
+            "1": "YES, compost or manure heap seen",
+        },
+        "Farm Visit Full - PR": {
+            "0": "NO",
+            "1": "YES, compost or manure heap seen",
+        },
+        "Farm Visit Full - ET": {
+            "0": "NO",
+            "1": "YES, compost or manure heap seen",
+        },
     },
     # 10. Stumping
     "stumping_methods_used_on_majority_of_trees": {

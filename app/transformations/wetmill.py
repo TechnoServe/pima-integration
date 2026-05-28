@@ -111,10 +111,10 @@ class WetmillTransformer:
 
     def _extract_location_string(self, location_string):
         """
-        Parse a GPS string "lat lon ..." into a Shapely Point (lon, lat).
+        Parse a GPS string "lat lon alt ..." into a Shapely Point (lon, lat, alt).
         """
         try:
-            lat, lon, *_ = map(float, location_string.split())
-            return Point(lon, lat)
+            lat, lon, alt, *_ = map(float, location_string.split())
+            return Point(lon, lat, alt)
         except Exception as e:
             return None

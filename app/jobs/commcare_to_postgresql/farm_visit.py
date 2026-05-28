@@ -27,7 +27,7 @@ from models import (
     CoffeeVariety,
     Check,
 )
-from core import logger, FV_BP_TYPE, FV_BP_MULTISELECT, FV_QUESTIONS_IGNORE_LIST
+from core import logger, FV_BP_TYPE, FV_BP_MULTISELECT, FV_QUESTIONS_IGNORE_LIST, APP_UPDATE_ZM
 from jobs.commcare_to_postgresql.participant_registration_and_update import ParticipantRegistrationAndUpdateOrchestrator
 
 
@@ -149,7 +149,7 @@ class FarmVisitOrchestrator:
 
             for question, value in other_fv_questions.items():
                 # Skip ignored questions entirely
-                if question in FV_QUESTIONS_IGNORE_LIST or question.endswith("_"):
+                if question in FV_QUESTIONS_IGNORE_LIST or question.endswith("_") or question.endswith("_label"):
                     continue
 
                 if "signature" in question:
@@ -267,7 +267,21 @@ class FarmVisitOrchestrator:
             )
 
             logger.info({f"Upserted fv best practice with record ID: '{result.id}'"})
-
+            
+            # Zimbabwe Conditionals for Compost and Manure multi-select question
+            fv_type = payload.get("form", {}).get("survey_type", "") == "Farm Visit Full - ZM"
+            # old_new = (
+            #     payload.get("app_id", "") == '8e8e5df7294548e6a4b55ca1a3a05f61' and int(payload.get("version", "0")) > 128
+            #     ) or (
+            #         payload.get("app_id", "") == '2b0b8dc3eff145889eaa3d085bfaadaf' and int(payload.get("version", "0")) > 296
+            #     ) or (
+            #         payload.get("app_id", "") == 'c14d231df6e142deb9bdd44319287437' and int(payload.get("version", "0")) > 257
+            #     ) or (
+            #         payload.get("app_id", "") == 'b75286e874c74eb09b8da436709d7f3c' and int(payload.get("version", "0")) > 493
+            #     )
+                
+            old_new = int(payload.get("version", "0")) > APP_UPDATE_ZM.get(payload.get("app_id", ""), 0)
+            
             # Step 4: Upsert the Best practice answers
             best_practice_answers: dict = bp_payload
 
@@ -284,6 +298,8 @@ class FarmVisitOrchestrator:
                         other = best_practice_answers.get(f"specify_{question}")
                     if any(word in question.lower() for word in ["photo", "image", "signature"]) or question.endswith("_other") or question.endswith("_specify") :
                         continue
+                    
+                    # 1. Handle multi-select questions (except the specific compost/manure question for Farm Visit Full - ZM)
                     elif question in FV_BP_MULTISELECT:
                         multiselect = answer.split(" ")
                         for ans in multiselect:
@@ -296,6 +312,21 @@ class FarmVisitOrchestrator:
                                 other=other,
                                 created_by_id=created_by_id,
                             )
+                    # 2. Handle the specific compost/manure multi-select question for Farm Visit Full - ZM
+                    elif question == "do_you_have_compost_manure" and fv_type and old_new:
+                        print("Processing the specific compost/manure multi-select question for Farm Visit Full - ZM with old/new versioning")
+                        multiselect = answer.split(" ")
+                        for ans in multiselect:
+                            self.process_fv_best_practice_answers(
+                                raw_payload=raw_payload,
+                                bp=bp,
+                                bp_question=question,
+                                bp_answer=ans,
+                                multiselect=True,
+                                other=other,
+                                created_by_id=created_by_id,
+                            )
+                    # 3. Handle all other questions as single-select or free text
                     else:
                         self.process_fv_best_practice_answers(
                             raw_payload=raw_payload,

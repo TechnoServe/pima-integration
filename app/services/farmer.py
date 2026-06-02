@@ -24,10 +24,10 @@ class FarmerService:
         )
 
         if existing:
-            logger.info({"message": f"Updating existing farmer record: {data.tns_id}"})
+            logger.info({"message": f"Updating existing farmer record: {data.commcare_case_id}"})
             return self._update_existing(existing, data, created_by_id)
         else:
-            logger.info({"message": f"Creating new farmer record: {data.tns_id}"})
+            logger.info({"message": f"Creating new farmer record: {data.commcare_case_id}"})
             return self._create_new(data, created_by_id)
 
     def _update_existing(
@@ -41,7 +41,7 @@ class FarmerService:
                 "farmer_group_id",
                 "household_id",
                 "commcare_case_id",
-                "tns_id",
+                # "tns_id" TNS IDs are not updated through CommCare, they are only set at creation and should never be updated from CommCare data
             ]:
                 # Always update core fields
                 setattr(existing, field, value)

@@ -146,24 +146,22 @@ class FarmerTransformer:
 
     def _map_farmer_update(self, payload: Dict) -> Dict[str, Any]:
         """Map data for Farmer - Edit Farmer Details"""
-        primary_household_member = (
-            payload.get("form", {}).get("Primary_Household_Member", "") == "Yes"
-        )
+        # primary_household_member = (
+        #     payload.get("form", {}).get("Primary_Household_Member", "") == "Yes"
+        # )
         return {
             "tns_id": payload.get("form", {}).get("Farmer_Id"),  # Not updated
             "commcare_case_id": payload.get("form", {})  # Not updated
             .get("case", {})
             .get("@case_id", ""),
             "first_name": payload.get("form", {}).get("First_Name"),  # Not updated
-            "middle_name": payload.get("form", {}).get(
-                "Middle_Name", ""
-            ),  # Not updated
+            "middle_name": payload.get("form", {}).get("Middle_Name"),  # Not updated
             "last_name": payload.get("form", {}).get("Last_Name"),  # Not updated
             "other_id": self._get_other_id_number(payload),  # Updated
             "gender": payload.get("form", {}).get("Gender"),  # Not updated
-            "age": int(payload.get("form", {}).get("Age")),  # Not updated
+            "age": int(payload.get("form", {}).get("Age")) if payload.get("form", {}).get("Age") else None,  # Not updated
             "phone_number": payload.get("form", {}).get("Phone_Number", ""),  # Updated
-            "is_primary_household_member": primary_household_member,  # Not updated
+            # "is_primary_household_member": primary_household_member,  # Not updated
             "status": "Active",  # Not updated
             "send_to_commcare": False,
             "send_to_commcare_status": "Pending",

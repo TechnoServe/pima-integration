@@ -164,10 +164,17 @@ FV_BP_MULTISELECT = [
 ]
 
 APP_UPDATE_ZM = {
+    # Zimbabwe
     "8e8e5df7294548e6a4b55ca1a3a05f61": 128, # 2024C
     "2b0b8dc3eff145889eaa3d085bfaadaf": 296, # 2021C
     "c14d231df6e142deb9bdd44319287437": 257, # 2019C
-    "b75286e874c74eb09b8da436709d7f3c": 493 # 2018C
+    "b75286e874c74eb09b8da436709d7f3c": 493, # 2018C
+    
+    # Ethiopia
+    "521097abbcfd4fa79668cb6ca3dca28a": 81, # Regrow 2025
+    "3e36504f1b964ed4b1699bc14fd8c249": 109, # Regrow 2026
+    "0c9b5791828b4baea6c1eaa4d6979c5a": 194, # CREW 2025
+    "ec6aed8f4ee7455abc06e951877c8b4a": 66 # CREW 2026
 }
 
 FV_QUESTIONS_IGNORE_LIST = [

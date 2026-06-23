@@ -314,7 +314,7 @@ class FarmVisitOrchestrator:
                             )
                     # 2. Handle the specific compost/manure multi-select question
                     elif question == "do_you_have_compost_manure" and old_new:
-                        print("Processing the specific compost/manure multi-select question for Farm Visit Full - ZM with old/new versioning")
+                        # print("Processing the specific compost/manure multi-select question for Farm Visit Full - ZM with old/new versioning")
                         multiselect = answer.split(" ")
                         for ans in multiselect:
                             self.process_fv_best_practice_answers(

@@ -66,20 +66,23 @@ class FVBestPracticeAnswerTransformer:
         answer_boolean: bool | None = None
 
         if bp_question in FV_BP_MAPPINGS and bp_question in FV_BP_VISIT_TYPE_FILTER:
-            if bp_question == "do_you_have_compost_manure" and visit_type == "Farm Visit Full - ZM" and multiselect == True:
+            # I need a cleaner way to handle this, but for now, this is the best I can do. The logic is a bit convoluted and could be refactored for clarity.
+            if bp_question == "do_you_have_compost_manure" and visit_type in ["Farm Visit Full - ZM", "Farm Visit Full - ET"] and multiselect == True:
                 answer = (
                     FV_BP_MAPPINGS.get(bp_question, {})
                     .get(visit_type, {})
                     .get("new", {})
                     .get(bp_answer, "")
                 )
-            if bp_question == "do_you_have_compost_manure" and visit_type == "Farm Visit Full - ZM" and multiselect == False:
+                # print(f"Answer for {bp_question} with multiselect True: {answer}")
+            elif bp_question == "do_you_have_compost_manure" and visit_type in ["Farm Visit Full - ZM", "Farm Visit Full - ET"] and multiselect == False:
                 answer = (
                     FV_BP_MAPPINGS.get(bp_question, {})
                     .get(visit_type, {})
                     .get("old", {})
                     .get(bp_answer, "")
                 )
+                # print(f"Answer for {bp_question} with multiselect False: {answer}")
             else:
                 answer = (
                     FV_BP_MAPPINGS.get(bp_question, {})
@@ -87,6 +90,8 @@ class FVBestPracticeAnswerTransformer:
                     .get(bp_answer, "")
                 )
             answer = f"Other: {other}" if answer == "Other" else answer
+            
+            # print(f"Answer for {bp_question} with visit_type {visit_type}: {answer}")
 
         # Special stumping year case
         elif bp_question == "year_stumping":

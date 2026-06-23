@@ -527,8 +527,16 @@ FV_BP_MAPPINGS = {
             "1": "YES, compost or manure heap seen",
         },
         "Farm Visit Full - ET": {
-            "0": "NO",
-            "1": "YES, compost or manure heap seen",
+            'old': {
+                "0": "NO",
+                "1": "YES, compost or manure heap seen",
+            },
+            'new': {
+                '1' : 'YES a compost heap',
+                '2' : 'YES a compost pit',
+                '3' : 'YES a manure heap', 
+                '0' : 'NO compost or manure'
+            }
         },
     },
     # 10. Stumping

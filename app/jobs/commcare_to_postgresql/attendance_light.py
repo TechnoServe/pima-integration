@@ -2,8 +2,13 @@ from sqlalchemy.orm import Session
 from services import ForeignKeyResolver, TrainingSessionService, ImageService
 from transformations import TrainingSessionTransformer, ImageTransformer
 from models import TrainingSession
+from copy import deepcopy
 from core import logger
+from dataclasses import dataclass
 
+@dataclass
+class finalResult:
+    id: list
 
 class AttendanceLightOrchestrator:
     """Orchestrates the entire ingestion process"""
@@ -19,7 +24,7 @@ class AttendanceLightOrchestrator:
     def process_data(self, raw_payload: dict, created_by_id: str):
 
         # Process training session data
-        return self.process_training_session(raw_payload, created_by_id)
+        return self.process_training_session_preliminary(raw_payload, created_by_id)
 
     def process_training_session(
         self, raw_payload: dict, created_by_id: str
@@ -101,3 +106,36 @@ class AttendanceLightOrchestrator:
             self.db.rollback()
             logger.error({"message": f"Unexpected error in image processing: {str(e)}"})
             raise
+        
+    def process_training_session_preliminary(self, raw_payload: dict, created_by_id: str):
+        """Check if the trainins session type is for WIL or not"""
+        
+        payload = raw_payload
+        
+        survey_detail = payload.get("form", {}).get("survey_detail", "")
+        
+        if survey_detail == "Women In Leadership - Attendance":
+            logger.info({"message": "Training session is for WIL"})
+            
+            # 1. Split Training Sessions from mapping
+            wil_modules = payload.get("form", {}).get("training_topic", "").split(" ")
+            wil_groups = payload.get("form", {}).get("focal_farmer_groups", "").split(" ")
+            results = []
+            for group in wil_groups:
+                # 1. Create a new payload for each WIL group
+                new_payload = deepcopy(payload)
+                new_payload["form"]["focal_farmer_groups"] = group
+                
+                for module in wil_modules:
+                    # 2. Create a new payload for each WIL session
+                    new_payload["form"]["training_topic"] = module
+                    
+                    # 3. Process each WIL session
+                    results.append(self.process_training_session(new_payload, created_by_id))
+            final_result = finalResult(id=results)
+            return final_result
+        else:
+            logger.info({"message": "Training session is not for WIL"})
+            return self.process_training_session(payload, created_by_id)
+
+        

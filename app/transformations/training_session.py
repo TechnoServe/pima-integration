@@ -1,7 +1,7 @@
 from typing import Dict, Any
 from schemas import TrainingSessionCreate
 from services import ForeignKeyResolver
-from models import User
+from models import User, TrainingSession, FarmerGroup, TrainingModule
 from core.logging_util import logger
 from pydantic import ValidationError
 
@@ -57,6 +57,8 @@ class TrainingSessionTransformer:
             "Existing Farmer Change in FFG",
         ]:
             return self._map_farmer_registration(payload)
+        elif form_name == "Attendance Full - WIL":
+            return self._map_wil_full_session(payload)
         else:
             # Default mapping
             return self._map_default_session(payload)
@@ -129,6 +131,37 @@ class TrainingSessionTransformer:
         """Map data for Attendance Full - FT (session 1 fields)"""
         return {
             "commcare_case_id": payload.get("form", {}).get("training_session", ""),
+            "date_session_1": payload.get("form", {}).get("date"),
+            "location_gps_latitude_session_1": self.parse_gps_coordinates(payload).get(
+                "latitude"
+            ),
+            "location_gps_longitude_session_1": self.parse_gps_coordinates(payload).get(
+                "longitude"
+            ),
+            "location_gps_altitude_session_1": self.parse_gps_coordinates(payload).get(
+                "altitude"
+            ),
+        }
+    
+    def _map_wil_full_session(self, payload: Dict) -> Dict[str, Any]:
+        """Map data for Attendance Full - FT (session 1 fields)"""
+        # Resolve CommCare Case ID for WIL training sessions by querying the Training session model using the fields "farmer_group_id" directly on the object and "module_name" in relation to module_id in the TrainingSession model. This is because WIL training sessions are not directly linked to a specific module in the payload, but rather to a farmer group and module name.
+        farmer_group_id = self.resolver.resolve_db_id(
+            external_id=payload.get("form", {}).get("focal_farmer_groups"),
+            id_column=FarmerGroup.commcare_case_id,
+            field="Farmer Group",
+            model=FarmerGroup,
+        ).id
+        training_session = self.resolver.resolve_db_id_multiple(
+            field_1=farmer_group_id,
+            field_1_name="farmer_group_id",
+            field_2=payload.get("form", {}).get("training_topic"),
+            field_2_name="module_id",
+            model=TrainingSession,
+        )
+        
+        return {
+            "commcare_case_id": training_session.commcare_case_id if training_session else None,
             "date_session_1": payload.get("form", {}).get("date"),
             "location_gps_latitude_session_1": self.parse_gps_coordinates(payload).get(
                 "latitude"

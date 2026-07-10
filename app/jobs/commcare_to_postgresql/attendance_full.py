@@ -5,6 +5,7 @@ from services import ForeignKeyResolver, AttendanceService, FarmerGroupService
 from transformations import AttendanceTransformer, FarmerGroupTransformer
 from models import Farmer, FarmerGroup
 from core import logger
+from copy import deepcopy
 from jobs.commcare_to_postgresql.attendance_light import AttendanceLightOrchestrator
 from dataclasses import dataclass
 
@@ -29,7 +30,7 @@ class AttendanceFullOrchestrator:
     def process_data(self, raw_payload: dict, created_by_id: str):
 
         # 1. Process training session data first
-        self.trainingsessionorchestrator.process_training_session(
+        self.trainingsessionorchestrator.process_training_session_preliminary(
             raw_payload=raw_payload, created_by_id=created_by_id
         )
         # 2. Process training group (FF & AFF)
@@ -51,25 +52,49 @@ class AttendanceFullOrchestrator:
             "New Farmer New Household": (payload.get("form", {}).get("subcase_0") or {}).get("case", {}).get("@case_id", ""),
             "New Farmer Existing Household": (payload.get("form", {}).get("subcase_0") or {}).get("case", {}).get("@case_id", ""),
             "Existing Farmer Change in FFG": payload.get("form", {}).get("existing_farmer_change_in_ffg", {}).get("old_farmer_id"),
-            "Attendance Full - Current Module": payload.get("form", {}).get("present_participants", "")
+            "Attendance Full - Current Module": payload.get("form", {}).get("present_participants", ""),
+            "Women In Leadership - Attendance": payload.get("form", {}).get("present_participants", ""),
         }
         try:
             farmer_external_ids = FARMER_ID.get((payload.get("form", {}).get("survey_detail", "Attendance Full - Current Module")),"").split()
-            print(f"Farmer IDs: {str(farmer_external_ids)}")
+            # print(f"Farmer IDs: {str(farmer_external_ids)}")
             results = []
             if farmer_external_ids:
-                for farmer_external_id in farmer_external_ids:
-                    transformed_data = self.transformer.transform(
-                        payload, farmer_external_id, id_column
-                    )
-                    result = self.service.upsert(transformed_data, created_by_id)
-                    results.append(result.id)
+                # Cater for Women in Leadership
+                survey_detail = payload.get("form", {}).get("survey_detail", "")
+                if survey_detail == "Women In Leadership - Attendance":
+                    logger.info({"message": "Training session is for WIL"})
+                    # 1. Split Training Sessions from mapping
+                    wil_modules = payload.get("form", {}).get("training_topic", "").split(" ")
+                    for module in wil_modules:
+                        # 2. Create a new payload for each WIL session
+                        new_payload = deepcopy(payload)
+                        new_payload["form"]["training_topic"] = module
+                        for farmer_external_id in farmer_external_ids:
+                            transformed_data = self.transformer.transform(
+                                new_payload, farmer_external_id, id_column, wil_flag=True
+                            )
+                            result = self.service.upsert(transformed_data, created_by_id)
+                            results.append(result.id)
 
-                    logger.info(
-                        {
-                            "message": f"Upserted attendance with record ID: '{result.id}'"
-                        }
-                    )
+                            logger.info(
+                                {
+                                    "message": f"Upserted attendance with record ID: '{result.id}'"
+                                }
+                            )
+                else:
+                    for farmer_external_id in farmer_external_ids:
+                        transformed_data = self.transformer.transform(
+                            payload, farmer_external_id, id_column
+                        )
+                        result = self.service.upsert(transformed_data, created_by_id)
+                        results.append(result.id)
+
+                        logger.info(
+                            {
+                                "message": f"Upserted attendance with record ID: '{result.id}'"
+                            }
+                        )
 
             final_result = finalResult(id=results)
             return final_result
@@ -88,6 +113,12 @@ class AttendanceFullOrchestrator:
             # Step 1: Parse raw JSON into Pydantic schema
             payload = raw_payload
 
+            # Skip if WIL form, as it doesn't contain farmer group data
+            survey_detail = payload.get("form", {}).get("survey_detail", "")
+            if survey_detail == "Women In Leadership - Attendance":
+                logger.info({"message": "Skipping farmer group processing for WIL form"})
+                return None
+            
             # Step 2: Transform payload (includes foreign key resolution)
             transformed_data = self.farmergrouptransformer.transform(payload)
 

@@ -3,6 +3,7 @@
 MIGRATED_FORM_TYPES = [
     "Farmer Registration",
     "Attendance Full - Current Module",
+    "Attendance Full - WIL",
     "Edit Farmer Details",
     "Training Observation",
     "Attendance Light - Current Module",
@@ -1540,4 +1541,17 @@ SURVEY_TRANSFORMATIONS = {
     "routine_visit": transformation_routine_visit,
     "cherry_weekly_price": transform_cherry_weekly_price,
     "gender_equitable_business_practices": transform_gender_equitable_business_practices,
+}
+
+# ---------------------------------
+# 4. OTHER MAPPINGS
+# ---------------------------------
+
+WIL_TOPICS  = {
+    "WIL AG": {
+        "1": "Envisioning My Leadership",
+        "2": "Defining The Positive Changes I Want To See",
+        "3": "Using My Voice To Lead",
+        "4": "Working Together To Achieve Positive Change",
+    },
 }

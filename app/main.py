@@ -46,6 +46,7 @@ def main():
 job_mapping = {
     "Farmer Registration": PJob,
     "Attendance Full - Current Module": AFJob,
+    "Attendance Full - WIL": AFJob,
     "Edit Farmer Details": PJob,
     "Training Observation": OBJob,
     "Attendance Light - Current Module": ALJob,

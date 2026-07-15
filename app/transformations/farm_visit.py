@@ -72,6 +72,7 @@ class FarmVisitTransformer:
                     Farmer,
                 ).household_id
                 secondary_farmer = payload.get("form", {}).get("secondary_farmer")
+                secondary_farmer_available = payload.get("form", {}).get("secondary_farmer_available", "") == "yes"
 
                 training_session_id = self.resolver.resolve_db_id(
                     payload.get("form", {}).get("training_session"),
@@ -80,7 +81,7 @@ class FarmVisitTransformer:
                     TrainingSession,
                 ).id
 
-                if secondary_farmer:
+                if secondary_farmer and secondary_farmer_available:
                     visited_secondary_farmer_id = self.resolver.resolve_db_id(
                         secondary_farmer,
                         Farmer.commcare_case_id,
@@ -100,6 +101,7 @@ class FarmVisitTransformer:
                     return FarmVisitCreate(
                         visited_household_id=visited_household_id,
                         visited_primary_farmer_id=visited_primary_farmer_id,
+                        visited_secondary_farmer_id=None,
                         training_session_id=training_session_id,
                         visiting_staff_id=visiting_staff_id,
                         **session_data,
@@ -152,6 +154,7 @@ class FarmVisitTransformer:
                     return FarmVisitCreate(
                         visited_household_id=visited_household_id,
                         visited_primary_farmer_id=visited_primary_farmer_id,
+                        visited_secondary_farmer_id=None,
                         training_session_id=training_session_id,
                         visiting_staff_id=visiting_staff_id,
                         **session_data,

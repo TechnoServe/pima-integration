@@ -176,6 +176,8 @@ class FarmVisitOrchestrator:
                     for k, v in flattened.items()
                     if not any(ignore_key in k for ignore_key in FV_QUESTIONS_IGNORE_LIST)
                 }
+                
+                logger.info({"message": f"Flattened and cleaned FV questions: {cleaned}"})
 
                 fv_questions.update(cleaned)
 

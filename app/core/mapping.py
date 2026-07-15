@@ -201,7 +201,7 @@ FV_QUESTIONS_IGNORE_LIST = [
     "meta",
     "present_participants",
     "previous_module",
-    "secondary_farmer",
+    # "secondary_farmer",
     "secondary_farmer_firstname",
     "secondary_farmer_fullname",
     "secondary_farmer_lastname",

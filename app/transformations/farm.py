@@ -3,7 +3,7 @@
 from datetime import datetime
 from typing import Dict, Any
 from schemas import FarmCreate
-from models import Household, FarmVisit
+from models import Household, FarmVisit, Farmer
 from services import ForeignKeyResolver
 from pydantic import ValidationError
 from core import logger
@@ -35,11 +35,11 @@ class FarmTransformer:
             # Resolve Household ID using PIMA ID (Could be SF ID or PostgreSQL ID in the future)
             try:
                 household_id = self.resolver.resolve_db_id(
-                    raw_payload.get("form", {}).get("household_pima_id"),
-                    Household.sf_id,
-                    "Household",
-                    Household,
-                ).id
+                    raw_payload.get("form", {}).get("farm_being_visted", ""),
+                    Farmer.commcare_case_id,
+                    "Primary Farmer",
+                    Farmer,
+                ).household_id
             except ValueError:
                 household_id = raw_payload.get("form", {}).get("household_pima_id")
 

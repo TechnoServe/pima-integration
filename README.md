@@ -57,7 +57,7 @@ A Flask-based ETL service that receives webhooks from **CommCare**, stores paylo
 4. **Set up environment variables** — create a `.env` file in the root:
    ```env
    SYSTEM_USER_ID_TEST=<your-system-user-id>
-   DATABASE_URL=postgresql://user:password@localhost:5432/pima
+   DATABASE_URL=postgresql://user:password@localhost:5432/<database-name>
    GOOGLE_APPLICATION_CREDENTIALS=<path-to-your-service-account.json>
    ```
 
@@ -150,18 +150,17 @@ Content-Type: application/json
 
 **Build the container image:**
 ```bash
-gcloud builds submit --tag gcr.io/pima-gcp/pima-integration-app
+gcloud builds submit --tag gcr.io/your-project-id/your-app-name
 ```
 
 **Deploy:**
 ```bash
-gcloud run deploy pima-integration-app \
-  --image gcr.io/pima-gcp/pima-integration-app \
-  --platform managed \
-  --allow-unauthenticated \
-  --region europe-west1 \
-  --network=default \
-  --subnet=default
+gcloud run deploy your-app-name \
+  --image gcr.io/your-project-id/your-app-name \
+  --platform <PLATFORM> \
+  --region <REGION> \
+  --network=<NETWORK> \
+  --subnet=<SUBNET>
 ```
 
 ### Database Migrations

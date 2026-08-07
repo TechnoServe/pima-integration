@@ -10,5 +10,6 @@ from .firestore_util import (
 from .gps_splitter_util import split_gps
 from .postgresql_util import init_db as init_pg_db, SessionLocal
 from .mapping import *
+from .auth import require_api_key
 
 print("Imported all core utils successfully!")
